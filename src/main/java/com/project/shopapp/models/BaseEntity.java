@@ -3,6 +3,7 @@ package com.project.shopapp.models;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
+@Builder
 public class BaseEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -26,7 +28,7 @@ public class BaseEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    @PrePersist
+    @PreUpdate
     protected void onUpdate(){
         updatedAt = LocalDateTime.now();
     }
