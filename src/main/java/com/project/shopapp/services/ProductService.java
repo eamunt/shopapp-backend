@@ -95,7 +95,7 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public Boolean existsProduct(String name){
+    public Boolean existsProductByName(String name){
         return productRepository.existsByName(name);
     }
 
