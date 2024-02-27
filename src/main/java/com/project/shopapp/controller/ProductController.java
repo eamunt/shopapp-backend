@@ -70,7 +70,7 @@ public class ProductController {
     }
 
     // request with images
-    @PostMapping(value = "uploads/{id}",
+    @PostMapping(value = "uploadImage/{id}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //POST http://localhost:8088/v1/api/products
     public ResponseEntity<?> uploadImages(
@@ -167,10 +167,30 @@ public class ProductController {
                         .totalPages(totalPages)
                 .build());
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<String> getProductById(@PathVariable("id") String productId){
-        return ResponseEntity.ok("Product with ID: " + productId);
+    public ResponseEntity<?> getProductById(@PathVariable("id") Long productId){
+        try {
+            Product existingProduct = productService.getProductById(productId);
+            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
+    @PutMapping("update/{id}")
+    public ResponseEntity<?> updateProductById(
+            @PathVariable("id") Long productId,
+            @RequestBody ProductDTO productDTO
+    ){
+        try {
+            Product updatedProduct = productService.updateProduct(productId, productDTO);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable long id){
 //        return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");

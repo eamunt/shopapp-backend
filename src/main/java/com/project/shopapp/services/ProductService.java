@@ -51,19 +51,9 @@ public class ProductService implements IProductService{
     @Override
     public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
         // get elements theo page and limit
-        return productRepository.findAll(pageRequest).map(product -> {
-            ProductResponse productResponse = ProductResponse.builder()
-                    .name(product.getName())
-                    .price(product.getPrice())
-                    .thumbnail(product.getThumbnail())
-                    .description(product.getDescription())
-                    .categoryId(product.getCategoryId().getId())
-                    .build();
-            productResponse.setCreatedAt(product.getCreatedAt());
-            productResponse.setUpdatedAt(product.getUpdatedAt());
-            return productResponse;
-            }
-        );
+        return productRepository
+                .findAll(pageRequest)
+                .map(ProductResponse::fromProduct);
     }
 
     @Override
@@ -71,7 +61,7 @@ public class ProductService implements IProductService{
         Product exsistingProduct = getProductById(idProduct);
         if(exsistingProduct != null){
 
-            Category exsistingCaterory = categoryRepository.
+            Category exsistingCategory = categoryRepository.
                     findById(productDTO.getCategoryId())
                     .orElseThrow(() ->
                             new DataNotFoundException("Cannot find category with id " + productDTO.getCategoryId()));
@@ -80,12 +70,12 @@ public class ProductService implements IProductService{
             exsistingProduct.setPrice(productDTO.getPrice());
             exsistingProduct.setThumbnail(productDTO.getThumbnail());
             exsistingProduct.setDescription(productDTO.getDescription());
-            exsistingProduct.setCategoryId(exsistingCaterory);
+            exsistingProduct.setCategoryId(exsistingCategory);
 
-            return productRepository.save(exsistingProduct);
+            productRepository.save(exsistingProduct);
         }
 
-        return null;
+        return exsistingProduct;
     }
 
     @Override
