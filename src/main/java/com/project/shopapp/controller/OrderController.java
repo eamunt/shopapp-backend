@@ -1,8 +1,10 @@
 package com.project.shopapp.controller;
 
 import com.project.shopapp.dtos.OrderDTO;
+import com.project.shopapp.models.User;
 import com.project.shopapp.responses.OrderResponse;
 import com.project.shopapp.services.IOrderService;
+import com.project.shopapp.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderController {
     private final IOrderService orderService;
+    private final IUserService userService;
     @PostMapping("")
     public ResponseEntity<?> createOrder(
             @RequestBody @Valid OrderDTO orderDTO,
@@ -35,31 +38,50 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{user_id}")
-    // GET: http://localhost:8088/api/v1/orders/4
-    public ResponseEntity<?> getOrders(@Valid @PathVariable("user_id") Long userId) {
+    @GetMapping("/user/{user_id}")
+    // GET: http://localhost:8088/api/v1/orders/user/4
+    public ResponseEntity<?> getUserOrders(@Valid @PathVariable("user_id") Long userId) {
         try {
-            return ResponseEntity.ok().body("Get Orders by user id: " + userId + " successfully");
+            User existingUser = userService.findUserById(userId);
+            List<OrderResponse> orderList = orderService.findByUserId(existingUser);
+            return ResponseEntity.ok().body(orderList);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{orderId}")
+    // GET: http://localhost:8088/api/v1/orders/4
+    public ResponseEntity<?> getOrder(@Valid @PathVariable("orderId") Long orderId) {
+        try {
+            OrderResponse existingOrder = orderService.getOrder(orderId);
+            return ResponseEntity.ok().body(existingOrder);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     // Put
-    @PutMapping("/{id}")
+    @PutMapping("/{idOrder}")
     // adming update order: money, address...
     public ResponseEntity<?> updateOrder(
-            @Valid @PathVariable("id") Long id,
+            @Valid @PathVariable("idOrder") Long id,
             @Valid @RequestBody OrderDTO orderDTO
     ){
-        return ResponseEntity.ok().body("Update successfully");
+        try {
+            OrderResponse updatedOrder = orderService.updateOrder(id, orderDTO);
+            return ResponseEntity.ok().body(updatedOrder);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // Delete
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(
-            @Valid @PathVariable("id") Long id
+            @Valid @PathVariable("orderId") Long orderId
     ){
+        orderService.deleteOrder(orderId);
         // update status field => false.
         return ResponseEntity.ok().body("Delete successfully");
     }
