@@ -32,7 +32,7 @@ public class OrderController {
                 return ResponseEntity.badRequest().body(errorMessages);
             }
             OrderResponse newOrder = orderService.createOrder(orderDTO);
-            return ResponseEntity.ok(newOrder);
+            return ResponseEntity.ok().body(newOrder);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +100,6 @@ public class OrderService implements IOrderService{
         List<Order> orders = orderRepository.findByUserId(userId);
         return orders.stream()
                 .map(order -> modelMapper.map(order, OrderResponse.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
