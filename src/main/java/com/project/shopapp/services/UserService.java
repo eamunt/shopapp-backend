@@ -71,9 +71,11 @@ public class UserService implements IUserService {
                 throw new BadCredentialsException("Wrong phone number or password");
             }
         }
+
         // authenticate with Java Spting security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-            phoneNumber, password
+            phoneNumber, password,
+                existingUser.getAuthorities()
         );
         authenticationManager.authenticate(authenticationToken);
         return jwtTokenUtil.generateToken(existingUser);
