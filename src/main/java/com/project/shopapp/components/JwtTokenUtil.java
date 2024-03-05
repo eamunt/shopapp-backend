@@ -81,13 +81,13 @@ public class JwtTokenUtil {
         return expirationDate.before(new Date());
     }
 
-    public String extractPhoneNumnber(String token){
+    public String extractPhoneNumber(String token){
         return extractClaim(token, Claims::getSubject);
     }
 
     public boolean validateToken(String token, UserDetails userDetails){
-        String phoneNumner = extractPhoneNumnber(token);
-        return (phoneNumner.equals(userDetails.getUsername())) &&
+        String phoneNumber = extractPhoneNumber(token);
+        return (phoneNumber.equals(userDetails.getUsername())) &&
                 !isTokenExpired(token);
     }
 

@@ -1,6 +1,7 @@
 package com.project.shopapp.filters;
 
 import com.project.shopapp.components.JwtTokenUtil;
+import com.project.shopapp.models.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +12,6 @@ import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -51,19 +51,22 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 
             final String token = authHeader.substring(7);
-            final String phoneNumner = jwtTokenUtil.extractPhoneNumnber(token);
+            final String phoneNumner = jwtTokenUtil.extractPhoneNumber(token);
 
             if(phoneNumner != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null){
+
                 // chưa đc authenticate
-                UserDetails userDetails = userDetailsService.loadUserByUsername(phoneNumner);
+
+                // phải ép kiểu -> User để getAuthorities() method có thể gọi đến method của ta
+                User userDetails =  (User) userDetailsService.loadUserByUsername(phoneNumner);
                 // check phoneNumner from token and expriration
                 if(jwtTokenUtil.validateToken(token, userDetails)){
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,
-                                    // ROLE_user
+                                    // ROLE_user:
                                     userDetails.getAuthorities()
                             );
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource()
@@ -75,6 +78,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         }catch (Exception e){
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
         }
 
 
