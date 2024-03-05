@@ -1,6 +1,7 @@
 package com.project.shopapp.configuations;
 
 import com.project.shopapp.filters.JwtTokenFilter;
+import com.project.shopapp.models.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,22 +31,73 @@ public class WebSecurityConfig {
                                 String.format("%s/users/login", apiPrefix)
                             )
                             .permitAll()
+                            // categories
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/categories?**", apiPrefix))
+                            .hasAnyRole(Role.USER, Role.ADMIN)
 
                             .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/categories/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.PUT,
+                                    String.format("%s/categories/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.DELETE,
+                                    String.format("%s/categories/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            //products
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/products**", apiPrefix))
+                            .hasAnyRole(Role.USER, Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/products/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.PUT,
+                                    String.format("%s/products/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.DELETE,
+                                    String.format("%s/products/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            //order_details
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/order_details/**", apiPrefix))
+                            .hasAnyRole(Role.USER, Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/order_details**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.PUT,
+                                    String.format("%s/order_details/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.DELETE,
+                                    String.format("%s/order_details/**", apiPrefix))
+                            .hasRole(Role.ADMIN)
+
+                            //orders
+                            .requestMatchers(HttpMethod.POST,
                                     String.format("%s/orders/**", apiPrefix))
-                            .hasRole("USER")
+                            .hasRole(Role.USER)
 
                             .requestMatchers(HttpMethod.GET,
                                     String.format("%s/orders/**", apiPrefix))
-                            .hasAnyRole("ADMIN", "USER")
+                            .hasAnyRole(Role.ADMIN, Role.USER)
 
                             .requestMatchers(HttpMethod.PUT,
                                     String.format("%s/orders/**", apiPrefix))
-                            .hasRole("ADMIN")
+                            .hasRole(Role.ADMIN)
 
                             .requestMatchers(HttpMethod.DELETE,
                                     String.format("%s/orders/**", apiPrefix))
-                            .hasRole("ADMIN")
+                            .hasRole(Role.ADMIN)
 
                             .anyRequest().authenticated();
                 });
