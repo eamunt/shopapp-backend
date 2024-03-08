@@ -39,6 +39,8 @@ public class UserService implements IUserService {
         if(role.getName().equals(Role.ADMIN)) {
             throw new PermissionDenyException("You can not register an admin account");
         }
+        Role role1 = roleRepository.findById(userDTO.getRoleId())
+                .orElse(roleRepository.findById(1L).orElse(null));
         // convert from UserDTO to =>  User
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
@@ -48,6 +50,7 @@ public class UserService implements IUserService {
                 .dateOfBirth(userDTO.getDateOfBirth())
                 .facebookAccountId(userDTO.getFacebookAccountId())
                 .googleAccountId(userDTO.getGoogleAccountId())
+                .roleId(role1)
                 .build();
 
         // nếu có accountId => không yêu cầu password
