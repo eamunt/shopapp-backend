@@ -44,6 +44,11 @@ public class CategoryService implements ICategoryService{
 
     @Override
     public void deleteCategory(Long categoryId) {
-        categoryRepository.deleteById(categoryId);
+        try {
+            getCategoryById(categoryId);
+            categoryRepository.deleteById(categoryId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

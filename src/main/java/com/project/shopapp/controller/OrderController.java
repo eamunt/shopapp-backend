@@ -1,10 +1,12 @@
 package com.project.shopapp.controller;
 
+import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.OrderResponse;
 import com.project.shopapp.services.IOrderService;
 import com.project.shopapp.services.IUserService;
+import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.List;
 public class OrderController {
     private final IOrderService orderService;
     private final IUserService userService;
+    private final LocalizationUtils localizationUtils;
     @PostMapping("")
     public ResponseEntity<?> createOrder(
             @RequestBody @Valid OrderDTO orderDTO,
@@ -83,7 +86,7 @@ public class OrderController {
     ){
         orderService.deleteOrder(orderId);
         // update status field => false.
-        return ResponseEntity.ok().body("Delete successfully");
+        return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY, String.valueOf(orderId)));
     }
 
 }

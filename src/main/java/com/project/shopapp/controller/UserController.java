@@ -1,10 +1,13 @@
 package com.project.shopapp.controller;
 
 
+import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
 import com.project.shopapp.models.User;
+import com.project.shopapp.responses.LoginResponse;
 import com.project.shopapp.services.UserService;
+import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final LocalizationUtils localizationUtils;
     @PostMapping("/register")
     public ResponseEntity<?> createUser(
             @Valid @RequestBody UserDTO userDTO,
@@ -35,8 +39,9 @@ public class UserController {
             }
 
             if(!userDTO.getPassword().equals(userDTO.getRetypePassword())){
-                return ResponseEntity.badRequest().body("Retype password does not match");
+                return ResponseEntity.badRequest().body(localizationUtils.getLocalizedMessage(MessageKeys.PASSWORD_NOT_MATCH));
             }
+
 
             User newUser = userService.createUser(userDTO);
 
@@ -47,7 +52,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO)
     {
         // Kiểm tra thông tin đăng nhập và sinh ra token
@@ -56,9 +61,16 @@ public class UserController {
                     userLoginDTO.getPhoneNumber(),
                     userLoginDTO.getPassword()
             );
-            return ResponseEntity.ok().body(token);
+            return ResponseEntity.ok(LoginResponse.builder()
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
+                    .token(token)
+                    .build()
+            );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(LoginResponse.builder()
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
+                    .build()
+            );
         }
         // Return token in response
     }

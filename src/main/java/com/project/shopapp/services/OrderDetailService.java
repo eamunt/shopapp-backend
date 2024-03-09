@@ -104,7 +104,12 @@ public class OrderDetailService implements IOrderDetailService{
 
     @Override
     public void deleteOrderDetail(Long id) {
-        orderDetailRepository.deleteById(id);
+        try {
+            getOrderDetail(id);
+            orderDetailRepository.deleteById(id);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
