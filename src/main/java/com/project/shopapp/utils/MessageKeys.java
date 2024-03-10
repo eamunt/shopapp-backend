@@ -14,4 +14,5 @@ public class MessageKeys {
     public static final String ERROR_MAX_5_IMAGES = "product.upload_images.error_max_5_images";
     public static final String FILE_LARGE = "product.upload_images.file_large";
     public static final String FILE_MUST_BE_IMAGE = "product.upload_images.file_must_be_image";
+    public static final String ROLE_NOT_EXIST = "role.get_role.not_found_role";
 }
