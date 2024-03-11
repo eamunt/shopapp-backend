@@ -153,7 +153,8 @@ public class ProductController {
         // create Pageable từ thông tin page và limit
         // sort: newest on top.
         PageRequest pageRequest = PageRequest.of(page, limit,
-                Sort.by("createdAt").descending());
+//                Sort.by("createdAt").descending());
+                  Sort.by("id").ascending());
 
         Page<ProductResponse> productPage = productService.getAllProducts(pageRequest);
         // get total of pages

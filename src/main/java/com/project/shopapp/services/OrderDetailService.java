@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class OrderDetailService implements IOrderDetailService{
     private final OrderDetailRepository orderDetailRepository;
     private final ModelMapper modelMapper;
     @Override
+    @Transactional
     public OrderDetailResponse createOrderDetail(OrderDetailDTO orderDetailDTO) throws Exception {
         Order existingOrder = orderRepository.findById(orderDetailDTO.getOrderId())
                 .orElseThrow(() -> new DataNotFoundException("Order not found: " + orderDetailDTO.getOrderId()));
@@ -66,6 +68,7 @@ public class OrderDetailService implements IOrderDetailService{
     }
 
     @Override
+    @Transactional
     public OrderDetailResponse updateOrderDetail(
             Long id,
             OrderDetailDTO orderDetailDTO) throws Exception
@@ -103,6 +106,7 @@ public class OrderDetailService implements IOrderDetailService{
     }
 
     @Override
+    @Transactional
     public void deleteOrderDetail(Long id) {
         try {
             getOrderDetail(id);
