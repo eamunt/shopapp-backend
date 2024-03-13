@@ -12,6 +12,7 @@ import com.project.shopapp.repositories.ProductImageRepository;
 import com.project.shopapp.repositories.ProductRepository;
 import com.project.shopapp.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class ProductService implements IProductService{
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final ModelMapper modelMapper;
     @Override
     @Transactional
     public Product createProduct(ProductDTO productDTO) throws DataNotFoundException {
@@ -51,11 +53,23 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
-        // get elements theo page and limit
-        return productRepository
-                .findAll(pageRequest)
-                .map(ProductResponse::fromProduct);
+    public Page<ProductResponse> getAllProducts(String keyword,
+                                                Long category_id,
+                                                PageRequest pageRequest) {
+        // get elements theo page and limit and categoryId (if exists)
+        Page<Product> productsPage;
+        try {
+            productsPage = productRepository.searchProducts(category_id, keyword, pageRequest);
+
+            // sử dụng modelMapper
+            modelMapper.typeMap(Product.class, ProductResponse.class);
+            return productsPage.map(f -> modelMapper.map(f, ProductResponse.class));
+            // hoặc
+            // return productsPage.map(ProductResponse::fromProduct);
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
