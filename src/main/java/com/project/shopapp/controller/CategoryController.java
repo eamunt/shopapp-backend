@@ -3,10 +3,15 @@ package com.project.shopapp.controller;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.CategoryDTO;
 import com.project.shopapp.models.Category;
+import com.project.shopapp.responses.CategoryListReponse;
+import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.services.CategoryService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -38,12 +43,21 @@ public class CategoryController {
 
     // display all categories
     @GetMapping("")
-    public ResponseEntity<List<Category>> getAllCategories(
+    public ResponseEntity<CategoryListReponse> getAllCategories(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit
     ){
-        List<Category> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        PageRequest pageRequest = PageRequest.of(page, limit,
+//                Sort.by("createdAt").descending());
+                Sort.by("id").ascending());
+        Page<Category> categoryPage = categoryService.getAllCategories(pageRequest);
+        // get total of pages
+        int totalPages = categoryPage.getTotalPages();
+        List<Category> categories = categoryPage.getContent();
+        return ResponseEntity.ok(CategoryListReponse.builder()
+                .categories(categories)
+                .totalPage(totalPages)
+                .build());
     }
 
     @PutMapping("/{id}")
