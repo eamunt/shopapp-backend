@@ -174,7 +174,8 @@ public class ProductController {
     public ResponseEntity<?> getProductById(@PathVariable("id") Long productId){
         try {
             Product existingProduct = productService.getProductById(productId);
-            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+            ProductResponse result = ProductResponse.fromProduct(existingProduct);
+            return ResponseEntity.ok().body(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -215,7 +216,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable long id){
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id){
 //        return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
         productService.deleteProduct(id);
         return ResponseEntity.ok(String.format("Product %s deleted successfully", id));
