@@ -70,6 +70,10 @@ public class WebSecurityConfig {
                             .permitAll()
 
                             .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/products/by-ids/**", apiPrefix))
+                            .permitAll()
+
+                            .requestMatchers(HttpMethod.GET,
                                     String.format("%s/products/?", apiPrefix))
                             .permitAll()
 
