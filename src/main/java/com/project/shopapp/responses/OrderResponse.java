@@ -1,17 +1,20 @@
 package com.project.shopapp.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.shopapp.dtos.CartItemDTO;
+import com.project.shopapp.models.BaseEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Getter
 @Setter
-public class OrderResponse extends BaseResponse{
+public class OrderResponse {
     private Long id;
 
     @JsonProperty("user_id")
@@ -30,7 +33,7 @@ public class OrderResponse extends BaseResponse{
     private String note;
 
     @JsonProperty("order_date")
-    private LocalDateTime orderDate;
+    private Date orderDate;
 
     private String status;
 
@@ -54,5 +57,9 @@ public class OrderResponse extends BaseResponse{
 
     @JsonProperty("active")
     private Boolean active; // thuộc về admin
+
+    @JsonProperty("cart_tems")
+    private List<CartItemDTO> cartTems;
+
 
 }

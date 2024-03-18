@@ -1,11 +1,12 @@
 package com.project.shopapp.services;
 
+import com.project.shopapp.dtos.CartItemDTO;
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
-import com.project.shopapp.models.Order;
-import com.project.shopapp.models.OrderStatus;
-import com.project.shopapp.models.User;
+import com.project.shopapp.models.*;
+import com.project.shopapp.repositories.OrderDetailRepository;
 import com.project.shopapp.repositories.OrderRepository;
+import com.project.shopapp.repositories.ProductRepository;
 import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.responses.OrderResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +25,8 @@ public class OrderService implements IOrderService{
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final ProductRepository productRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
     @Transactional
@@ -42,20 +46,46 @@ public class OrderService implements IOrderService{
         order.setStatus(OrderStatus.PENDING);
         // check shipping_date >= today
         LocalDate shippingDate = orderDTO.getShippingDate() == null
-                ? LocalDate.now() : orderDTO.getShippingDate();
-        if(shippingDate.isBefore(LocalDate.now())){
+                ? null : orderDTO.getShippingDate();
+
+        if (shippingDate != null && shippingDate.isBefore(LocalDate.now())) {
             throw new DataNotFoundException("Date must be at least today");
         }
         order.setShippingDate(shippingDate);
         order.setActive(true);
-
+        order.setTotalMoney(orderDTO.getTotalMoney());
         // save to DB
         orderRepository.save(order);
 
+        // create OrderDetail from CartItemDTO
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for(CartItemDTO cartItemDTO : orderDTO.getCartItems()){
+            OrderDetail orderDetail = new OrderDetail();
+
+            // get data from cartItemDTO
+            Long productId = cartItemDTO.getProductId();
+            int quantity = cartItemDTO.getQuantity();
+
+            // find info product
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new DataNotFoundException("Product not found with id " + productId));
+            orderDetail.setProductId(product);
+            orderDetail.setNumberOfProducts(quantity);
+            orderDetail.setPrice(product.getPrice());
+            orderDetail.setOrderId(order);
+            orderDetails.add(orderDetail);
+
+        }
+        // save to OrderDetail
+        orderDetailRepository.saveAll(orderDetails);
+
         // Configure the mapping between Order and OrderResponse
         modelMapper.typeMap(Order.class, OrderResponse.class);
+        OrderResponse orderResponse = new OrderResponse();
+        modelMapper.map(order, orderResponse);
+        orderResponse.setCartTems(orderDTO.getCartItems());
 
-        return modelMapper.map(order, OrderResponse.class);
+        return orderResponse;
 
     }
 
