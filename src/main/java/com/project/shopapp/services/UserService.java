@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -69,11 +70,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public String login(String phoneNumber, String password, Long roleId) throws Exception {
+    public Map<String, String> login(String phoneNumber, String password, Long roleId) throws Exception {
         Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+
         if(optionalUser.isEmpty()){
             throw new DataNotFoundException("Invalid phone number / password");
         }
+        Long userId = optionalUser.get().getId();
         User existingUser = optionalUser.get();
         // check password
         if(existingUser.getFacebookAccountId() == 0 && existingUser.getGoogleAccountId() == 0) {

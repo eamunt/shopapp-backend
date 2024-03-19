@@ -3,6 +3,8 @@ package com.project.shopapp.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.Map;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -14,4 +16,7 @@ public class LoginResponse {
 
     @JsonProperty("token")
     private String token;
+
+    @JsonProperty("user_id")
+    private String userId;
 }

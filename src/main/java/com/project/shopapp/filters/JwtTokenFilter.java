@@ -75,11 +75,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 }
             }
 
+            filterChain.doFilter(request, response);
+
         }catch (Exception e){
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             return;
         }
-        filterChain.doFilter(request, response);
+
 
 
     }

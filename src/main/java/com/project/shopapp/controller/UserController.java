@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("${api.prefix}/users")
@@ -57,14 +58,15 @@ public class UserController {
     {
         // Kiểm tra thông tin đăng nhập và sinh ra token
         try {
-            String token = userService.login(
+            Map<String, String> token = userService.login(
                     userLoginDTO.getPhoneNumber(),
                     userLoginDTO.getPassword(),
                     userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId()
             );
             return ResponseEntity.ok(LoginResponse.builder()
                     .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
-                    .token(token)
+                    .token(token.get("token_string"))
+                    .userId(token.get("user_id"))
                     .build()
             );
         } catch (Exception e) {
