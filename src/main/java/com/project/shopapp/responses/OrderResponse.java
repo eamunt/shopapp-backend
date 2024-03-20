@@ -3,6 +3,7 @@ package com.project.shopapp.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.shopapp.dtos.CartItemDTO;
 import com.project.shopapp.models.BaseEntity;
+import com.project.shopapp.models.OrderDetail;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -57,6 +58,9 @@ public class OrderResponse {
 
     @JsonProperty("active")
     private Boolean active; // thuộc về admin
+
+    @JsonProperty("order_details")
+    private List<OrderDetail> orderDetails;
 
     @JsonProperty("cart_tems")
     private List<CartItemDTO> cartTems;

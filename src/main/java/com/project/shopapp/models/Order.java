@@ -1,10 +1,13 @@
 package com.project.shopapp.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -64,9 +67,8 @@ public class Order extends BaseEntity{
     @Column(name = "active")
     private boolean active;
 
-
-
-
-
+    @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JsonManagedReference
+    private List<OrderDetail> orderDetails;
 
 }
