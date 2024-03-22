@@ -29,11 +29,12 @@ public class JwtTokenUtils {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
-    public Map<String, String> generateToken(User user) throws Exception{
+    public String generateToken(User user) throws Exception{
         // properties -> claims
         Map<String, Object> claims = new HashMap<>();
 //        this.generateSecretKey();
         claims.put("phoneNumber", user.getPhoneNumber());
+        claims.put("userId", user.getId());
         try {
             String token = Jwts
                     .builder()
@@ -42,10 +43,7 @@ public class JwtTokenUtils {
                     .setExpiration(new Date(System.currentTimeMillis() + expiration*1000L))
                     .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                     .compact();
-            Map<String, String> result = new HashMap<>();
-            result.put("token_string", token);
-            result.put("user_id", user.getId().toString());
-            return result;
+            return token;
         }catch (Exception e){
             // can use "Logger"
             throw new InvalidParamException("Cannot create jwt token, error " + e.getMessage());

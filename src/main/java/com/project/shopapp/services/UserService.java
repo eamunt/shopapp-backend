@@ -5,12 +5,15 @@ import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
+import com.project.shopapp.models.OrderDetail;
 import com.project.shopapp.models.Role;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
 import com.project.shopapp.repositories.UserRepository;
+import com.project.shopapp.responses.UserResponse;
 import com.project.shopapp.utils.MessageKeys;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,6 +34,7 @@ public class UserService implements IUserService {
     private final JwtTokenUtils jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
     private final LocalizationUtils localizationUtils;
+    private final ModelMapper modelMapper;
     @Override
     @Transactional
     public User createUser(UserDTO userDTO) throws Exception {
@@ -70,7 +74,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Map<String, String> login(String phoneNumber, String password, Long roleId) throws Exception {
+    public String login(String phoneNumber, String password, Long roleId) throws Exception {
         Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
 
         if(optionalUser.isEmpty()){
@@ -91,6 +95,10 @@ public class UserService implements IUserService {
             throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.ROLE_NOT_EXIST));
         }
 
+        if(!existingUser.isActive()){
+            throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.USER_IS_LOCKED));
+        }
+
         // authenticate with Java Spting security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             phoneNumber, password,
@@ -104,5 +112,20 @@ public class UserService implements IUserService {
     public User findUserById(Long userId) throws Exception {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("User: " + userId + " found"));
+    }
+
+    @Override
+    public UserResponse getUserDetailsFromToken(String token) throws Exception {
+        if(jwtTokenUtil.isTokenExpired(token)){
+            throw new Exception("Token is expired");
+        }
+        String numberPhone = jwtTokenUtil.extractPhoneNumber(token);
+        Optional<User> user = userRepository.findByPhoneNumber(numberPhone);
+        if(user.isPresent()){
+            modelMapper.typeMap(User.class, UserResponse.class);
+            return modelMapper.map(user, UserResponse.class);
+        }else{
+            throw new Exception("User not found");
+        }
     }
 }

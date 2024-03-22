@@ -6,16 +6,14 @@ import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.LoginResponse;
+import com.project.shopapp.responses.UserResponse;
 import com.project.shopapp.services.UserService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -58,15 +56,14 @@ public class UserController {
     {
         // Kiểm tra thông tin đăng nhập và sinh ra token
         try {
-            Map<String, String> token = userService.login(
+            String token = userService.login(
                     userLoginDTO.getPhoneNumber(),
                     userLoginDTO.getPassword(),
                     userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId()
             );
-            return ResponseEntity.ok(LoginResponse.builder()
+            return ResponseEntity.ok().body(LoginResponse.builder()
                     .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
-                    .token(token.get("token_string"))
-                    .userId(token.get("user_id"))
+                    .token(token)
                     .build()
             );
         } catch (Exception e) {
@@ -76,5 +73,16 @@ public class UserController {
             );
         }
         // Return token in response
+    }
+
+    @PostMapping ("/details")
+    public ResponseEntity<UserResponse> getUserDetails(@RequestHeader("Authorization") String token){
+        try {
+            String extractedToken = token.substring(7);
+            UserResponse user = userService.getUserDetailsFromToken(extractedToken);
+            return ResponseEntity.ok().body(user);
+        }catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
