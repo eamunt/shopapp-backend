@@ -65,6 +65,8 @@ public class OrderService implements IOrderService{
             // get data from cartItemDTO
             Long productId = cartItemDTO.getProductId();
             int quantity = cartItemDTO.getQuantity();
+            Float totalMoney = cartItemDTO.getTotalMoney();
+
 
             // find info product
             Product product = productRepository.findById(productId)
@@ -72,6 +74,7 @@ public class OrderService implements IOrderService{
             orderDetail.setProductId(product);
             orderDetail.setNumberOfProducts(quantity);
             orderDetail.setPrice(product.getPrice());
+            orderDetail.setTotalMoney(totalMoney);
             orderDetail.setOrderId(order);
             orderDetails.add(orderDetail);
 

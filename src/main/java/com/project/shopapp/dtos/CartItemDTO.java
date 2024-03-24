@@ -13,4 +13,7 @@ public class CartItemDTO {
     private Long productId;
 
     private Integer quantity;
+
+    @JsonProperty("total_money")
+    private Float totalMoney;
 }
