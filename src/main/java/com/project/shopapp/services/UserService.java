@@ -2,6 +2,7 @@ package com.project.shopapp.services;
 
 import com.project.shopapp.components.JwtTokenUtils;
 import com.project.shopapp.components.LocalizationUtils;
+import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
@@ -127,5 +128,54 @@ public class UserService implements IUserService {
         }else{
             throw new Exception("User not found");
         }
+    }
+
+    @Transactional
+    @Override
+    public UserResponse updateUser(Long userId, UpdateUserDTO updateUserDTO) throws Exception {
+        // Find the user by ID
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        // Check if the phone number is being updated and if it already exists for another user
+        String newPhoneNumber = updateUserDTO.getPhoneNumber();
+        if (!existingUser.getPhoneNumber().equals(newPhoneNumber) && userRepository.existsByPhoneNumber(newPhoneNumber)) {
+            throw new DataIntegrityViolationException("Phone number already exists");
+        }
+
+        // Update user fields if the new value is not null
+        if (updateUserDTO.getFullName() != null) {
+            existingUser.setFullName(updateUserDTO.getFullName());
+        }
+        if (newPhoneNumber != null) {
+            existingUser.setPhoneNumber(updateUserDTO.getPhoneNumber());
+        }
+        if (updateUserDTO.getAddress() != null) {
+            existingUser.setAddress(updateUserDTO.getAddress());
+        }
+        if (updateUserDTO.getDateOfBirth() != null) {
+            existingUser.setDateOfBirth(updateUserDTO.getDateOfBirth());
+        }
+        if (updateUserDTO.getFacebookAccountId() > 0 ) {
+            existingUser.setFacebookAccountId(updateUserDTO.getFacebookAccountId());
+        }
+        if (updateUserDTO.getGoogleAccountId() > 0) {
+            existingUser.setGoogleAccountId(updateUserDTO.getGoogleAccountId());
+        }
+
+        // Set password if account is not linked to Facebook or Google
+        if (updateUserDTO.getFacebookAccountId() == 0 && updateUserDTO.getGoogleAccountId() == 0) {
+            String newPassword = updateUserDTO.getPassword();
+            String retypePassword = updateUserDTO.getRetypePassword();
+            if (newPassword != null && !updateUserDTO.getPassword().isEmpty() && newPassword.equals(retypePassword)) {
+                String encodedPassword = passwordEncoder.encode(newPassword);
+                existingUser.setPassword(encodedPassword);
+            }
+        }
+
+        modelMapper.typeMap(User.class, UserResponse.class);
+        userRepository.save(existingUser);
+
+        return modelMapper.map(existingUser, UserResponse.class);
     }
 }

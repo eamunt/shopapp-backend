@@ -36,11 +36,14 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> {
+
+                    // user
                     requests.requestMatchers(
                                 String.format("%s/users/register", apiPrefix),
                                 String.format("%s/users/login", apiPrefix)
                             )
                             .permitAll()
+
 
                             //roles
                             .requestMatchers(HttpMethod.GET,
