@@ -6,7 +6,6 @@ import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
-import com.project.shopapp.models.OrderDetail;
 import com.project.shopapp.models.Role;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
@@ -23,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -137,18 +135,17 @@ public class UserService implements IUserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
 
-        // Check if the phone number is being updated and if it already exists for another user
-        String newPhoneNumber = updateUserDTO.getPhoneNumber();
-        if (!existingUser.getPhoneNumber().equals(newPhoneNumber) && userRepository.existsByPhoneNumber(newPhoneNumber)) {
-            throw new DataIntegrityViolationException("Phone number already exists");
+        // Check if the provided old password matches the existing password
+        String oldPassword = updateUserDTO.getOldPassword();
+        String existingPassword = existingUser.getPassword();
+        if (!passwordEncoder.matches(oldPassword, existingPassword)) {
+            throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.OLD_PASSWORD_NOT_MATCHING));
+
         }
 
         // Update user fields if the new value is not null
         if (updateUserDTO.getFullName() != null) {
             existingUser.setFullName(updateUserDTO.getFullName());
-        }
-        if (newPhoneNumber != null) {
-            existingUser.setPhoneNumber(updateUserDTO.getPhoneNumber());
         }
         if (updateUserDTO.getAddress() != null) {
             existingUser.setAddress(updateUserDTO.getAddress());
@@ -167,7 +164,10 @@ public class UserService implements IUserService {
         if (updateUserDTO.getFacebookAccountId() == 0 && updateUserDTO.getGoogleAccountId() == 0) {
             String newPassword = updateUserDTO.getPassword();
             String retypePassword = updateUserDTO.getRetypePassword();
-            if (newPassword != null && !updateUserDTO.getPassword().isEmpty() && newPassword.equals(retypePassword)) {
+            if(!newPassword.equals(retypePassword)){
+                throw new DataNotFoundException("Password and retype password not the same");
+            }
+            if (!updateUserDTO.getPassword().isEmpty()) {
                 String encodedPassword = passwordEncoder.encode(newPassword);
                 existingUser.setPassword(encodedPassword);
             }

@@ -16,4 +16,5 @@ public class MessageKeys {
     public static final String FILE_MUST_BE_IMAGE = "product.upload_images.file_must_be_image";
     public static final String ROLE_NOT_EXIST = "role.get_role.not_found_role";
     public static final String USER_IS_LOCKED = "user.is_locked";
+    public  static final String OLD_PASSWORD_NOT_MATCHING = "user.update.old_password_not_matching";
 }

@@ -13,13 +13,13 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserDTO {
-    @JsonProperty("fullname")
+    @JsonProperty("full_name")
     private String fullName;
 
-    @JsonProperty("phone_number")
-    private String phoneNumber;
-
     private String address;
+
+    @JsonProperty("old_password")
+    private String oldPassword;
 
     private String password;
 

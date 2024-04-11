@@ -89,7 +89,7 @@ public class UserController {
     }
 
     @PutMapping("/details/{userId}")
-    public ResponseEntity<UserResponse> updateUserDetails(
+    public ResponseEntity<?> updateUserDetails(
             @PathVariable Long userId,
             @RequestBody UpdateUserDTO updatedUserDTO,
             @RequestHeader("Authorization") String authorizationHeader
@@ -104,7 +104,7 @@ public class UserController {
             UserResponse updatedUser = userService.updateUser(userId, updatedUserDTO);
             return ResponseEntity.ok().body(updatedUser);
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
