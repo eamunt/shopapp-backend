@@ -55,6 +55,7 @@ public class UserService implements IUserService {
                 .fullName(userDTO.getFullName())
                 .phoneNumber(userDTO.getPhoneNumber())
                 .address(userDTO.getAddress())
+                .active(true)
                 .password(userDTO.getPassword())
                 .dateOfBirth(userDTO.getDateOfBirth())
                 .facebookAccountId(userDTO.getFacebookAccountId())
@@ -144,10 +145,10 @@ public class UserService implements IUserService {
         }
 
         // Update user fields if the new value is not null
-        if (updateUserDTO.getFullName() != null) {
+        if (!updateUserDTO.getFullName().isEmpty()) {
             existingUser.setFullName(updateUserDTO.getFullName());
         }
-        if (updateUserDTO.getAddress() != null) {
+        if (!updateUserDTO.getAddress().isEmpty()) {
             existingUser.setAddress(updateUserDTO.getAddress());
         }
         if (updateUserDTO.getDateOfBirth() != null) {
@@ -161,16 +162,16 @@ public class UserService implements IUserService {
         }
 
         // Set password if account is not linked to Facebook or Google
-        if (updateUserDTO.getFacebookAccountId() == 0 && updateUserDTO.getGoogleAccountId() == 0) {
+        if (updateUserDTO.getFacebookAccountId() == 0 && updateUserDTO.getGoogleAccountId() == 0 && !updateUserDTO.getPassword().isEmpty()) {
             String newPassword = updateUserDTO.getPassword();
             String retypePassword = updateUserDTO.getRetypePassword();
             if(!newPassword.equals(retypePassword)){
                 throw new DataNotFoundException("Password and retype password not the same");
             }
-            if (!updateUserDTO.getPassword().isEmpty()) {
-                String encodedPassword = passwordEncoder.encode(newPassword);
-                existingUser.setPassword(encodedPassword);
-            }
+
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            existingUser.setPassword(encodedPassword);
+
         }
 
         modelMapper.typeMap(User.class, UserResponse.class);
