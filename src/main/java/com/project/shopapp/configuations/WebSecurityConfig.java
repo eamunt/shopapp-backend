@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +25,7 @@ import java.util.List;
 @Configuration
 //@EnableMethodSecurity
 @EnableWebSecurity
+@EnableMethodSecurity()
 @EnableWebMvc
 @RequiredArgsConstructor
 public class WebSecurityConfig {
@@ -121,6 +123,10 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.GET,
                                     String.format("%s/orders/**", apiPrefix))
                             .permitAll()
+
+//                            .requestMatchers(HttpMethod.GET,
+//                                    String.format("%s/orders/get-orders-by-keyword", apiPrefix))
+//                            .hasRole(Role.ADMIN)
 
                             .requestMatchers(HttpMethod.PUT,
                                     String.format("%s/orders/**", apiPrefix))

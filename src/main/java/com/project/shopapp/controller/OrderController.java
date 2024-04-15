@@ -2,14 +2,23 @@ package com.project.shopapp.controller;
 
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;
+import com.project.shopapp.models.Order;
 import com.project.shopapp.models.User;
+import com.project.shopapp.responses.OrderListResponse;
 import com.project.shopapp.responses.OrderResponse;
+import com.project.shopapp.responses.ProductListResponse;
+import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.services.IOrderService;
 import com.project.shopapp.services.IUserService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,6 +96,29 @@ public class OrderController {
         orderService.deleteOrder(orderId);
         // update status field => false.
         return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY, String.valueOf(orderId)));
+    }
+
+    @GetMapping("/get-orders-by-keyword")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<OrderListResponse> getOrdersByKeyword(@RequestParam(defaultValue = "") String keyword,
+                                                                @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "10") int limit
+    ){// create Pageable từ thông tin page và limit
+        // sort: newest on top.
+        PageRequest pageRequest = PageRequest.of(page, limit,
+//                Sort.by("createdAt").descending());
+                Sort.by("id").ascending());
+
+        Page<OrderResponse> orderPage = orderService.getOrdersByKeyword(keyword, pageRequest);
+        // get total of pages
+        int totalPages = orderPage.getTotalPages();
+        List<OrderResponse> orders = orderPage.getContent();
+
+        return ResponseEntity.ok(OrderListResponse
+                .builder()
+                .orders(orders)
+                .totalPages(totalPages)
+                .build());
     }
 
 }

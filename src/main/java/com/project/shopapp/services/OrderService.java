@@ -9,8 +9,11 @@ import com.project.shopapp.repositories.OrderRepository;
 import com.project.shopapp.repositories.ProductRepository;
 import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.responses.OrderResponse;
+import com.project.shopapp.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,5 +141,22 @@ public class OrderService implements IOrderService{
         return orders.stream()
                 .map(order -> modelMapper.map(order, OrderResponse.class))
                 .toList();
+    }
+
+    @Override
+    public Page<OrderResponse> getOrdersByKeyword(String keyword, Pageable pageable) {
+        Page<Order> ordersPage;
+        try {
+            ordersPage = orderRepository.findByKeyword(keyword, pageable);
+
+            // sử dụng modelMapper
+            modelMapper.typeMap(Order.class, OrderResponse.class);
+            return ordersPage.map(f -> modelMapper.map(f, OrderResponse.class));
+            // hoặc
+            // return productsPage.map(ProductResponse::fromProduct);
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }

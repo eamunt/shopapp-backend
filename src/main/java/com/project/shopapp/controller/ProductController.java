@@ -148,7 +148,7 @@ public class ProductController {
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0", name="category_id") Long categoryId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "0") int limit
+            @RequestParam(defaultValue = "10") int limit
     ){
         // create Pageable từ thông tin page và limit
         // sort: newest on top.
