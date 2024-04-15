@@ -59,6 +59,12 @@ public class OrderResponse {
     @JsonProperty("active")
     private Boolean active; // thuộc về admin
 
+    @JsonProperty("created_at")
+    private Date createdAt;
+
+    @JsonProperty("updated_at")
+    private Date updatedAt;
+
     @JsonProperty("order_details")
     private List<OrderDetail> orderDetails;
 

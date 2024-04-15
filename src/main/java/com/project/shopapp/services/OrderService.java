@@ -11,13 +11,17 @@ import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.responses.OrderResponse;
 import com.project.shopapp.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -149,9 +153,15 @@ public class OrderService implements IOrderService{
         try {
             ordersPage = orderRepository.findByKeyword(keyword, pageable);
 
-            // sử dụng modelMapper
-            modelMapper.typeMap(Order.class, OrderResponse.class);
-            return ordersPage.map(f -> modelMapper.map(f, OrderResponse.class));
+            TypeMap<Order, OrderResponse> typeMap = modelMapper.typeMap(Order.class, OrderResponse.class);
+            typeMap.addMappings(mapper -> {
+                // Add a custom converter for the createdDate field
+                mapper.using(localDateTimeToDateConverter).map(Order::getCreatedAt, OrderResponse::setCreatedAt);
+                mapper.using(localDateTimeToDateConverter).map(Order::getUpdatedAt, OrderResponse::setUpdatedAt);
+
+            });
+
+            return ordersPage.map(order -> modelMapper.map(order, OrderResponse.class));
             // hoặc
             // return productsPage.map(ProductResponse::fromProduct);
         }catch (Exception e) {
@@ -159,4 +169,8 @@ public class OrderService implements IOrderService{
         }
         return null;
     }
+    Converter<LocalDateTime, Date> localDateTimeToDateConverter = context -> {
+        LocalDateTime source = context.getSource();
+        return Date.from(source.atZone(ZoneId.systemDefault()).toInstant());
+    };
 }
