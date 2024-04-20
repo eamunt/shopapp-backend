@@ -136,6 +136,12 @@ public class WebSecurityConfig {
                                     String.format("%s/orders/**", apiPrefix))
                             .hasRole(Role.ADMIN)
 
+
+                            // health
+
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/healthcheck/**", apiPrefix)).permitAll()
+
                             .anyRequest().authenticated();
                 });
         httpSecurity.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
