@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version: '3.2.4'
 	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.14'
+	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.1.1'
 
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

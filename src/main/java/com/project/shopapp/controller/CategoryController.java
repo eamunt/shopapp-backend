@@ -1,6 +1,7 @@
 package com.project.shopapp.controller;
 
 import com.project.shopapp.components.LocalizationUtils;
+import com.project.shopapp.components.converters.CategoryMessageConverter;
 import com.project.shopapp.dtos.CategoryDTO;
 import com.project.shopapp.models.Category;
 import com.project.shopapp.responses.CategoryListReponse;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +27,7 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
     private final LocalizationUtils localizationUtils;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     @PostMapping("")
     // data transfer object
     public ResponseEntity<?> createCategory(
@@ -37,7 +40,9 @@ public class CategoryController {
                     .toList();
             return ResponseEntity.badRequest().body(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_FAILED));
         }
-        categoryService.createCategory(categoryDTO);
+        Category category = categoryService.createCategory(categoryDTO);
+        this.kafkaTemplate.send("insert-a-category", category);
+        this.kafkaTemplate.setMessageConverter(new CategoryMessageConverter());
         return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_SUCCESSFULLY));
     }
 
@@ -54,6 +59,7 @@ public class CategoryController {
         // get total of pages
         int totalPages = categoryPage.getTotalPages();
         List<Category> categories = categoryPage.getContent();
+        this.kafkaTemplate.send("get-all-categories", categories);
         return ResponseEntity.ok(CategoryListReponse.builder()
                 .categories(categories)
                 .totalPage(totalPages)
