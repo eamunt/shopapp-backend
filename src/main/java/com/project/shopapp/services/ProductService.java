@@ -84,11 +84,21 @@ public class ProductService implements IProductService{
                     .orElseThrow(() ->
                             new DataNotFoundException("Cannot find category with id " + productDTO.getCategoryId()));
 
-            exsistingProduct.setName(productDTO.getName());
-            exsistingProduct.setPrice(productDTO.getPrice());
-            exsistingProduct.setThumbnail(productDTO.getThumbnail());
-            exsistingProduct.setDescription(productDTO.getDescription());
-            exsistingProduct.setCategoryId(exsistingCategory);
+            if(productDTO.getName() != null && productDTO.getName().isEmpty()) {
+                exsistingProduct.setName(productDTO.getName());
+            }
+            if(productDTO.getPrice() >= 0) {
+                exsistingProduct.setPrice(productDTO.getPrice());
+            }
+            if(productDTO.getThumbnail() != null && productDTO.getThumbnail().isEmpty()) {
+                exsistingProduct.setThumbnail(productDTO.getThumbnail());
+            }
+            if(productDTO.getDescription() != null && productDTO.getDescription().isEmpty()) {
+                exsistingProduct.setDescription(productDTO.getDescription());
+            }
+            if(productDTO.getCategoryId() != null ) {
+                exsistingProduct.setCategoryId(exsistingCategory);
+            }
 
             productRepository.save(exsistingProduct);
         }
