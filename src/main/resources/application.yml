@@ -2,10 +2,10 @@ server:
   port: 8088
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/shopapp?useSSL=false&rserverTimezone=UTC
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/shopapp?useSSL=false&rserverTimezone=UTC&allowPublicKeyRetrieval=true}
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password:
+    password: ${MYSQL_ROOT_PASSWORD:}
   jpa:
     show-sql: true
     hibernate:
@@ -14,12 +14,36 @@ spring:
       hibernate:
       dialect: org.hibernate.dialect.MySQL8Dialect
       format_sql: true
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    default-locale: en
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER_SERVER:localhost}:${KAFKA_BROKER_PORT:9092}
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      #transaction-id-prefix: tx.
+      properties:
+        "[spring.json.type.mapping]": category:com.project.shopapp.models.Category
+    consumer:
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  data:
+    redis:
+      use-redis-cache: true
+      host: ${REDIS_HOST:localhost} #default to 'localhost' if not provided
+      port: ${REDIS_PORT:6379} #default to '6379' if not provided
+
 api:
   prefix: api/v1
 jwt:
   expiration: 2592000 #30 days = 30*24*60*60
-  secretKey: i am trying
+  secretKey: jiAML0fQ4KgnrsopUrFYR2Z/yxQAZ4TzzQb8obQI+oY=
+
+#// khi deploy thì nên bỏ đi
+logging:
+  level:
+    org.springframework.security: DEBUG

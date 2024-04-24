@@ -1,5 +1,6 @@
 package com.project.shopapp.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.javafaker.Faker;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.ProductDTO;
@@ -9,6 +10,7 @@ import com.project.shopapp.models.ProductImage;
 import com.project.shopapp.responses.ProductListResponse;
 import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.services.IProductService;
+import com.project.shopapp.services.ProductRedisService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class ProductController {
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final IProductService productService;
     private final LocalizationUtils localizationUtils;
+    private final ProductRedisService productRedisService;
 
     // request with json without image
     @PostMapping("")
@@ -152,7 +155,7 @@ public class ProductController {
             @RequestParam(defaultValue = "0", name="category_id") Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit
-    ){
+    ) throws JsonProcessingException {
 
         // create Pageable từ thông tin page và limit
         // sort: newest on top.
@@ -162,16 +165,37 @@ public class ProductController {
         logger.info(String.format("keyword = %s, category_id = %d, page = %d, limit = %d",
                 keyword, categoryId, page, limit));
 
-        Page<ProductResponse> productPage = productService.getAllProducts(keyword, categoryId, pageRequest);
-        // get total of pages
-        int totalPages = productPage.getTotalPages();
-        List<ProductResponse> products = productPage.getContent();
 
-        return ResponseEntity.ok(ProductListResponse
-                .builder()
-                        .products(products)
-                        .totalPages(totalPages)
-                .build());
+        // kiểm tra trong redis có tồn tại chưa
+        ProductListResponse productListResponses = productRedisService.getAllProducts(keyword, categoryId, pageRequest);
+        int totalPages = 0;
+
+        if(productListResponses == null){
+            Page<ProductResponse> productPage = productService.getAllProducts(keyword, categoryId, pageRequest);
+            // get total of pages
+            totalPages = productPage.getTotalPages();
+            List<ProductResponse> productResponses = productPage.getContent();
+            productListResponses = ProductListResponse
+                    .builder()
+                    .products(productResponses)
+                    .totalPages(totalPages)
+                    .build();
+            productRedisService.saveAllProducts(
+                    productListResponses,
+                    keyword,
+                    categoryId,
+                    pageRequest
+            );
+        }
+        return ResponseEntity.ok().body(productListResponses);
+
+
+    }
+
+    @GetMapping("/clear")
+    public ResponseEntity<?> clearCache(){
+        productRedisService.clear();
+        return ResponseEntity.ok().body("clear successfully");
     }
 
     @GetMapping("/{id}")
