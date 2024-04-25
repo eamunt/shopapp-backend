@@ -4,6 +4,7 @@ import com.project.shopapp.filters.JwtTokenFilter;
 import com.project.shopapp.models.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -41,8 +42,8 @@ public class WebSecurityConfig {
 
                     // user
                     requests.requestMatchers(
-                                String.format("%s/users/register", apiPrefix),
-                                String.format("%s/users/login", apiPrefix)
+                                    String.format("%s/users/register", apiPrefix),
+                                    String.format("%s/users/login", apiPrefix)
                             )
                             .permitAll()
 
@@ -143,8 +144,9 @@ public class WebSecurityConfig {
 
                             // health
 
-                            .requestMatchers(HttpMethod.GET,
-                                    String.format("%s/healthcheck/**", apiPrefix)).permitAll()
+                            .requestMatchers(
+                                    String.format("%s/healthcheck/**", apiPrefix),
+                                    String.format("%s/actuator/health", apiPrefix)).permitAll()
 
                             .anyRequest().authenticated();
                 });
@@ -162,6 +164,7 @@ public class WebSecurityConfig {
                 httpSecurityCorsConfigurer.configurationSource(source);
             }
         });
+        httpSecurity.securityMatcher(String.valueOf(EndpointRequest.toAnyEndpoint()));
         return httpSecurity.build();
     }
 }

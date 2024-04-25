@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.InetAddress;
 import java.util.List;
 
 @RestController
@@ -29,10 +30,8 @@ public class HealthCheckController {
             // get total of pages
             int totalPages = categoryPage.getTotalPages();
             List<Category> categories = categoryPage.getContent();
-            return ResponseEntity.ok(CategoryListReponse.builder()
-                    .categories(categories)
-                    .totalPage(totalPages)
-                    .build());
+            String computerName = InetAddress.getLocalHost().getHostName();
+            return ResponseEntity.ok().body("Computer Name: " + computerName);
         }catch (Exception e){
             return ResponseEntity.badRequest().body("failed");
         }
