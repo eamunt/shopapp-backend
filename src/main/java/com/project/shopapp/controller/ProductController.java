@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,7 @@ public class ProductController {
 
     // request with json without image
     @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     //POST http://localhost:8088/v1/api/products
     public ResponseEntity<?> createProduct(
             @Valid @RequestBody ProductDTO productDTO,
@@ -79,6 +81,7 @@ public class ProductController {
     @PostMapping(value = "uploadImage/{id}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //POST http://localhost:8088/v1/api/products
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> uploadImages(
             @PathVariable("id") Long productId,
             @ModelAttribute("files") List<MultipartFile> files
@@ -231,6 +234,7 @@ public class ProductController {
     }
 
     @PutMapping("update/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateProductById(
             @PathVariable("id") Long productId,
             @RequestBody ProductDTO productDTO
@@ -244,6 +248,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id){
 //        return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
         productService.deleteProduct(id);

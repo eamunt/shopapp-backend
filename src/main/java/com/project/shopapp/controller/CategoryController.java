@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class CategoryController {
     private final LocalizationUtils localizationUtils;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     // data transfer object
     public ResponseEntity<?> createCategory(
             @Valid @RequestBody CategoryDTO categoryDTO,
@@ -67,6 +69,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> updateCategory(
             @PathVariable Long id,
             @RequestBody @Valid CategoryDTO categoryDTO){
@@ -75,6 +78,7 @@ public class CategoryController {
         return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.UPDATE_CATEGORY_SUCCESSFULLY));
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id){
         try {
             categoryService.deleteCategory(id);

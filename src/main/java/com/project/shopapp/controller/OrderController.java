@@ -32,6 +32,7 @@ public class OrderController {
     private final IUserService userService;
     private final LocalizationUtils localizationUtils;
     @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<?> createOrder(
             @RequestBody @Valid OrderDTO orderDTO,
             BindingResult result) {
@@ -75,6 +76,7 @@ public class OrderController {
 
     // Put
     @PutMapping("/{idOrder}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     // adming update order: money, address...
     public ResponseEntity<?> updateOrder(
             @Valid @PathVariable("idOrder") Long id,
@@ -90,6 +92,7 @@ public class OrderController {
 
     // Delete
     @DeleteMapping("/{orderId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deleteOrder(
             @Valid @PathVariable("orderId") Long orderId
     ){
