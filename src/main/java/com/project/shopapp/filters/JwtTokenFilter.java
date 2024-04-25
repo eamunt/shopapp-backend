@@ -96,7 +96,31 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of(String.format("%s/products", apiPrefix), "GET"),
                 Pair.of(String.format("%s/categories", apiPrefix), "GET"),
                 Pair.of(String.format("%s/users/register", apiPrefix), "POST"),
-                Pair.of(String.format("%s/users/login", apiPrefix), "POST")
+                Pair.of(String.format("%s/users/login", apiPrefix), "POST"),
+
+
+                // Swagger
+                Pair.of("/api-docs","GET"),
+//                Pair.of("/api-docs/**","GET"),
+                Pair.of("/swagger-resources","GET"),
+//                Pair.of("/swagger-resources/**","GET"),
+                Pair.of("/configuration/ui","GET"),
+                Pair.of("/configuration/security","GET"),
+
+//                Pair.of("/swagger-ui/**","GET"),
+                Pair.of("/swagger-ui/swagger-ui.css","GET"),
+                Pair.of("/swagger-ui/index.css","GET"),
+
+                Pair.of("/swagger-ui/swagger-ui-bundle.js","GET"),
+                Pair.of("/swagger-ui/swagger-initializer.js","GET"),
+                Pair.of("/swagger-ui/swagger-ui-standalone-preset.js","GET"),
+
+                Pair.of("swagger-ui/favicon-32x32.png","GET"),
+                Pair.of("swagger-ui/favicon-16x16.png","GET"),
+
+                Pair.of("/swagger-ui.html", "GET"),
+                Pair.of("/swagger-ui/index.html", "GET")
+
         );
         // tách ra vì tránh truy cập vào /get-orders-by-keyword
         if(request.getServletPath().equals(String.format("%s/orders", apiPrefix))

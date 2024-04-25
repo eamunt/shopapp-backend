@@ -66,3 +66,11 @@ management:
       exposure:
         #include: "health"
         include: "health, info"
+
+# swagger-ui custom path
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+  show-actuator: true
