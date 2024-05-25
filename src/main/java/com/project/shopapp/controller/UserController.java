@@ -5,13 +5,17 @@ import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
+import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.LoginResponse;
 import com.project.shopapp.responses.UserResponse;
+import com.project.shopapp.services.ITokenService;
 import com.project.shopapp.services.UserService;
 import com.project.shopapp.utils.MessageKeys;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +31,8 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
     private final LocalizationUtils localizationUtils;
+    private final ITokenService ITokenService;
+    private final ModelMapper modelMapper;
     @PostMapping("/register")
     public ResponseEntity<?> createUser(
             @Valid @RequestBody UserDTO userDTO,
@@ -53,9 +59,15 @@ public class UserController {
         }
     }
 
+    private boolean isMobileDevice(String userAgent) {
+        // Kiểm tra User-Agent header để xác định thiết bị di động
+        return userAgent.toLowerCase().contains("mobile");
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody UserLoginDTO userLoginDTO)
+            @Valid @RequestBody UserLoginDTO userLoginDTO,
+            HttpServletRequest request)
     {
         // Kiểm tra thông tin đăng nhập và sinh ra token
         try {
@@ -64,6 +76,13 @@ public class UserController {
                     userLoginDTO.getPassword(),
                     userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId()
             );
+            String userAgent = request.getHeader("User-Agent");
+            UserResponse userDetail = userService.getUserDetailsFromToken(token);
+
+            modelMapper.typeMap(UserResponse.class, User.class);
+            User user = modelMapper.map(userDetail, User.class);
+            Token jwtToken = ITokenService.addToken(user, token, isMobileDevice(userAgent));
+
             return ResponseEntity.ok().body(LoginResponse.builder()
                     .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
                     .token(token)

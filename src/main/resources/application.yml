@@ -58,6 +58,7 @@ api:
 jwt:
   expiration: 2592000 #30 days = 30*24*60*60
   secretKey: jiAML0fQ4KgnrsopUrFYR2Z/yxQAZ4TzzQb8obQI+oY=
+  expiration-refresh-token: 5184000 #60 days = 60 * 24 * 60 * 60
 
 #// khi deploy thì nên bỏ đi
 logging:

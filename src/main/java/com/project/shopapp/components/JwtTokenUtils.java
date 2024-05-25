@@ -1,7 +1,9 @@
 package com.project.shopapp.components;
 
 import com.project.shopapp.exceptions.InvalidParamException;
+import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
+import com.project.shopapp.repositories.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,6 +30,8 @@ public class JwtTokenUtils {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
+
+    private final TokenRepository tokenRepository;
 
     public String generateToken(User user) throws Exception{
         // properties -> claims
@@ -88,6 +92,10 @@ public class JwtTokenUtils {
 
     public boolean validateToken(String token, UserDetails userDetails){
         String phoneNumber = extractPhoneNumber(token);
+        Token existingToken = tokenRepository.findByToken(token);
+        if(existingToken == null || existingToken.isRevoked() == true){
+            return false;
+        }
         return (phoneNumber.equals(userDetails.getUsername())) &&
                 !isTokenExpired(token);
     }
