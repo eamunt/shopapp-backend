@@ -30,6 +30,12 @@ public class Token {
     @Column(name = "is_mobile", columnDefinition = "TINYINT(1)")
     private boolean isMobile;
 
+    @Column(name = "refresh_token", length = 255)
+    private String refreshToken;
+
+    @Column(name = "refresh_expiration_date")
+    private LocalDateTime refreshExpirationDate;
+
     private boolean revoked;
     private boolean expired;
 

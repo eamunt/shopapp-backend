@@ -7,8 +7,10 @@ import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
 import com.project.shopapp.models.Role;
+import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
+import com.project.shopapp.repositories.TokenRepository;
 import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.responses.UserResponse;
 import com.project.shopapp.utils.MessageKeys;
@@ -34,6 +36,7 @@ public class UserService implements IUserService {
     private final AuthenticationManager authenticationManager;
     private final LocalizationUtils localizationUtils;
     private final ModelMapper modelMapper;
+    private final TokenRepository tokenRepository;
     @Override
     @Transactional
     public User createUser(UserDTO userDTO) throws Exception {
@@ -127,6 +130,12 @@ public class UserService implements IUserService {
         }else{
             throw new Exception("User not found");
         }
+    }
+
+    @Override
+    public UserResponse getUserDetailsFromRefreshToken(String refreshToken) throws Exception {
+        Token existingToken = tokenRepository.findByRefreshToken(refreshToken);
+        return getUserDetailsFromToken(existingToken.getToken());
     }
 
     @Transactional

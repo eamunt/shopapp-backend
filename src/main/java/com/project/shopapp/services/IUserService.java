@@ -13,7 +13,7 @@ public interface IUserService {
     User findUserById(Long userId) throws Exception;
 
     UserResponse getUserDetailsFromToken(String token) throws Exception;
-
+    UserResponse getUserDetailsFromRefreshToken(String refreshToken) throws Exception;
     UserResponse updateUser(Long userId, UpdateUserDTO updateUserDTO) throws Exception;
 
 }

@@ -1,6 +1,8 @@
 package com.project.shopapp.services;
 
 import com.project.shopapp.components.JwtTokenUtils;
+import com.project.shopapp.exceptions.DataNotFoundException;
+import com.project.shopapp.exceptions.ExpiredTokenException;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.TokenRepository;
@@ -62,12 +64,30 @@ public class TokenService  implements ITokenService{
                 .isMobile(isMobileDevice)
                 .build();
 
+        newToken.setRefreshToken(UUID.randomUUID().toString());
+        newToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(expirationRefreshToken));
+
         tokenRepository.save(newToken);
         return newToken;
     }
 
+    @Transactional
     @Override
     public Token refreshToken(String refreshToken, User user) throws Exception {
-        return null;
+        Token existingToken = tokenRepository.findByRefreshToken(refreshToken);
+        if(existingToken == null){
+            throw new DataNotFoundException("Refresh token does not exist");
+        }
+        if(existingToken.getRefreshExpirationDate().isBefore(LocalDateTime.now())) {
+            tokenRepository.delete(existingToken);
+            throw new ExpiredTokenException("Refresh token is expired");
+        }
+        String token = jwtTokenUtils.generateToken(user);
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusSeconds(expiration);
+        existingToken.setExpirationDate(expirationDateTime);
+        existingToken.setToken(token);
+        existingToken.setRefreshToken(UUID.randomUUID().toString());
+        existingToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(expirationRefreshToken));
+        return existingToken;
     }
 }

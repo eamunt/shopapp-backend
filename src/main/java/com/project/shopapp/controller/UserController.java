@@ -2,6 +2,7 @@ package com.project.shopapp.controller;
 
 
 import com.project.shopapp.components.LocalizationUtils;
+import com.project.shopapp.dtos.RefreshTokenDTO;
 import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
@@ -10,6 +11,7 @@ import com.project.shopapp.models.User;
 import com.project.shopapp.responses.LoginResponse;
 import com.project.shopapp.responses.UserResponse;
 import com.project.shopapp.services.ITokenService;
+import com.project.shopapp.services.TokenService;
 import com.project.shopapp.services.UserService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +35,7 @@ public class UserController {
     private final LocalizationUtils localizationUtils;
     private final ITokenService ITokenService;
     private final ModelMapper modelMapper;
+    private final TokenService tokenService;
     @PostMapping("/register")
     public ResponseEntity<?> createUser(
             @Valid @RequestBody UserDTO userDTO,
@@ -64,6 +67,32 @@ public class UserController {
         return userAgent.toLowerCase().contains("mobile");
     }
 
+    @PostMapping("/refreshToken")
+    public ResponseEntity<LoginResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenDTO refreshTokenDTO
+            ) throws Exception {
+        UserResponse userDetail = userService.getUserDetailsFromRefreshToken(refreshTokenDTO.getRefreshToken());
+
+        modelMapper.typeMap(UserResponse.class, User.class);
+        User user = modelMapper.map(userDetail, User.class);
+
+        Token jwtToken = tokenService.refreshToken(refreshTokenDTO.getRefreshToken(), user);
+        LoginResponse loginResponse = LoginResponse.builder()
+                .message("Refresh Token successfully")
+                .token(jwtToken.getToken())
+                .tokenType(jwtToken.getTokenType())
+                .refreshToken(jwtToken.getRefreshToken())
+                .username(user.getUsername())
+                .roles(user.getRoleId())
+                .id(user.getId())
+                .build();
+        return ResponseEntity.ok().body(
+                loginResponse
+        );
+
+
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO,
@@ -84,8 +113,13 @@ public class UserController {
             Token jwtToken = ITokenService.addToken(user, token, isMobileDevice(userAgent));
 
             return ResponseEntity.ok().body(LoginResponse.builder()
-                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
-                    .token(token)
+                            .tokenType(jwtToken.getTokenType())
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .roles(user.getRoleId())
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
+                            .token(jwtToken.getToken())
+                            .refreshToken(jwtToken.getRefreshToken())
                     .build()
             );
         } catch (Exception e) {
