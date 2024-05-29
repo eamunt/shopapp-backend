@@ -20,6 +20,10 @@ public class CategoryService implements ICategoryService{
     @Override
     @Transactional
     public Category createCategory(CategoryDTO categoryDTO) {
+        Category check = categoryRepository.findByName(categoryDTO.getName());
+        if(check != null) {
+            return null;
+        }
         Category newCategory = Category
                 .builder()
                 .name(categoryDTO.getName())

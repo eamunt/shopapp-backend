@@ -6,6 +6,7 @@ import com.project.shopapp.dtos.CategoryDTO;
 import com.project.shopapp.models.Category;
 import com.project.shopapp.responses.CategoryListReponse;
 import com.project.shopapp.responses.ProductResponse;
+import com.project.shopapp.responses.ResponseObject;
 import com.project.shopapp.services.CategoryService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,9 +45,30 @@ public class CategoryController {
             return ResponseEntity.badRequest().body(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_FAILED));
         }
         Category category = categoryService.createCategory(categoryDTO);
+        if(category == null){
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("Duplicate category")
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
+        }
         this.kafkaTemplate.send("insert-a-category", category);
         this.kafkaTemplate.setMessageConverter(new CategoryMessageConverter());
-        return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_SUCCESSFULLY));
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_SUCCESSFULLY))
+                .status(HttpStatus.OK)
+                .build());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseObject> getCategoryById(
+            @PathVariable("id") Long categoryId
+    ) {
+        Category existingCategory = categoryService.getCategoryById(categoryId);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .data(existingCategory)
+                .message("Get category information successfully")
+                .status(HttpStatus.OK)
+                .build());
     }
 
     // display all categories
@@ -70,21 +93,30 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> updateCategory(
+    public ResponseEntity<ResponseObject> updateCategory(
             @PathVariable Long id,
             @RequestBody @Valid CategoryDTO categoryDTO){
 
         categoryService.updateCategory(id, categoryDTO);
-        return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.UPDATE_CATEGORY_SUCCESSFULLY));
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message(localizationUtils.getLocalizedMessage(MessageKeys.UPDATE_CATEGORY_SUCCESSFULLY))
+                .status(HttpStatus.OK)
+                .build());
     }
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long id){
+    public ResponseEntity<ResponseObject> deleteCategory(@PathVariable Long id){
         try {
             categoryService.deleteCategory(id);
-            return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_CATEGORY_SUCCESSFULLY, String.valueOf(id)));
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_CATEGORY_SUCCESSFULLY, String.valueOf(id)))
+                    .status(HttpStatus.OK)
+                    .build());
         }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
         }
     }
 }
