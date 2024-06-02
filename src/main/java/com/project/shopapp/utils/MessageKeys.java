@@ -17,4 +17,10 @@ public class MessageKeys {
     public static final String ROLE_NOT_EXIST = "role.get_role.not_found_role";
     public static final String USER_IS_LOCKED = "user.is_locked";
     public  static final String OLD_PASSWORD_NOT_MATCHING = "user.update.old_password_not_matching";
+    public static final String UPDATE_PRODUCT_SUCCESSFULLY= "product.update_product.update_successfully";
+    public static final String DELETE_PRODUCT_SUCCESSFULLY= "product.delete_product.delete_successfully";
+    public static final String INSERT_PRODUCT_SUCCESSFULLY= "product.insert_product.insert_successfully";
+
+
+
 }

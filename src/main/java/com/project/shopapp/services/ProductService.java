@@ -136,8 +136,8 @@ public class ProductService implements IProductService{
 
         // limit 5 images for a product
         int size = productImageRepository.findByProductId(productId).size();
-        if(size > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT ) {
-            throw new InvalidParamException("Limit" +
+        if(size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT ) {
+            throw new InvalidParamException("Limit " +
                     ProductImage.MAXIMUM_IMAGES_PER_PRODUCT + " images for a product");
         }
         return productImageRepository.save(newProductImage);

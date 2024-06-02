@@ -9,6 +9,7 @@ import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
 import com.project.shopapp.responses.ProductListResponse;
 import com.project.shopapp.responses.ProductResponse;
+import com.project.shopapp.responses.ResponseObject;
 import com.project.shopapp.services.IProductService;
 import com.project.shopapp.services.ProductRedisService;
 import com.project.shopapp.utils.MessageKeys;
@@ -20,6 +21,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,9 +71,19 @@ public class ProductController {
                 return ResponseEntity.badRequest().body(errorMessages);
             }
             // save product
-            Product newProduct = productService.createProduct(productDTO);
-
-            return ResponseEntity.ok(newProduct);
+            try {
+                Product newProduct = productService.createProduct(productDTO);
+                return ResponseEntity.ok(ResponseObject.builder()
+                        .data(newProduct)
+                        .message(localizationUtils.getLocalizedMessage(MessageKeys.INSERT_PRODUCT_SUCCESSFULLY))
+                        .status(HttpStatus.OK)
+                        .build());
+            }catch (Exception e){
+                return ResponseEntity.ok(ResponseObject.builder()
+                        .message(e.getMessage())
+                        .status(HttpStatus.BAD_REQUEST)
+                        .build());
+            }
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -95,7 +107,7 @@ public class ProductController {
                 return ResponseEntity.badRequest().body("Must select file");
             }
 
-            if(files.size() > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
+            if(files.size() >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
                 return ResponseEntity.badRequest().body(localizationUtils.getLocalizedMessage(MessageKeys.ERROR_MAX_5_IMAGES));
             }
             List<ProductImage> listProductImages = new ArrayList<>();
@@ -241,18 +253,35 @@ public class ProductController {
     ){
         try {
             Product updatedProduct = productService.updateProduct(productId, productDTO);
-            return ResponseEntity.ok(updatedProduct);
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .data(updatedProduct)
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.UPDATE_CATEGORY_SUCCESSFULLY) + " with id: " + productId )
+                    .status(HttpStatus.OK)
+                    .build());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
         }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> deleteProduct(@PathVariable Long id){
+    public ResponseEntity<ResponseObject> deleteProduct(@PathVariable Long id){
 //        return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
-        productService.deleteProduct(id);
-        return ResponseEntity.ok(String.format("Product %s deleted successfully", id));
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_PRODUCT_SUCCESSFULLY) + " with id: " + id)
+                    .status(HttpStatus.OK)
+                    .build());
+        }catch (Exception e){
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
+        }
     }
 
     @GetMapping("/by-ids")
