@@ -17,9 +17,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +37,7 @@ public class ProductService implements IProductService{
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final ModelMapper modelMapper;
+    private static String UPLOADS_FOLDER = "uploads";
     @Override
     @Transactional
     public Product createProduct(ProductDTO productDTO) throws DataNotFoundException {
@@ -84,16 +94,16 @@ public class ProductService implements IProductService{
                     .orElseThrow(() ->
                             new DataNotFoundException("Cannot find category with id " + productDTO.getCategoryId()));
 
-            if(productDTO.getName() != null && productDTO.getName().isEmpty()) {
+            if(productDTO.getName() != null && !productDTO.getName().isEmpty()) {
                 exsistingProduct.setName(productDTO.getName());
             }
             if(productDTO.getPrice() >= 0) {
                 exsistingProduct.setPrice(productDTO.getPrice());
             }
-            if(productDTO.getThumbnail() != null && productDTO.getThumbnail().isEmpty()) {
+            if(productDTO.getThumbnail() != null && !productDTO.getThumbnail().isEmpty()) {
                 exsistingProduct.setThumbnail(productDTO.getThumbnail());
             }
-            if(productDTO.getDescription() != null && productDTO.getDescription().isEmpty()) {
+            if(productDTO.getDescription() != null && !productDTO.getDescription().isEmpty()) {
                 exsistingProduct.setDescription(productDTO.getDescription());
             }
             if(productDTO.getCategoryId() != null ) {
@@ -140,8 +150,46 @@ public class ProductService implements IProductService{
             throw new InvalidParamException("Limit " +
                     ProductImage.MAXIMUM_IMAGES_PER_PRODUCT + " images for a product");
         }
+        if(exsistingProduct.getThumbnail() == null){
+            exsistingProduct.setThumbnail(newProductImage.getImageUrl());
+        }
+        productRepository.save(exsistingProduct);
         return productImageRepository.save(newProductImage);
 
+    }
+
+    @Override
+    public void deleteFile(String fileName) throws IOException{
+        // path to the folder containing file
+        java.nio.file.Path uploadDir = Paths.get(UPLOADS_FOLDER);
+        // Full path to the file which we want to delete
+        java.nio.file.Path filePath = uploadDir.resolve(fileName);
+
+       // check existing file
+       if(Files.exists(filePath)){
+           // delete file
+           Files.delete(filePath);
+       }else {
+           throw new FileNotFoundException("File not found: " + fileName);
+       }
+    }
+
+    @Override
+    public String storeFile(MultipartFile file) throws IOException {
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        // Add UUID to before fileName to ensure uniqueness for fileName
+        String uniqueFilename = UUID.randomUUID().toString() + "_" + fileName;
+        // path to folder which contains image.
+        java.nio.file.Path uploadDir = Paths.get("uploads");
+        // check and create folder if it no exists
+        if (!Files.exists(uploadDir)){
+            Files.createDirectories(uploadDir);
+        }
+        // fully path to file
+        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
+        // copy file to destination directory
+        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+        return uniqueFilename;
     }
 
     @Override

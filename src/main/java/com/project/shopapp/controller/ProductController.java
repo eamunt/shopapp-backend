@@ -128,7 +128,7 @@ public class ProductController {
                 }
 
                 // Save file and update thumbnail trong DTO
-                String filename = storeFile(file);
+                String filename = productService.storeFile(file);
                 // save to product object trong DB: save to table => later
                 ProductImage productImage = productService.createProductImage(
                         existingProduct,
@@ -147,22 +147,7 @@ public class ProductController {
 
     }
 
-    private String storeFile(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        // Add UUID to before fileName to ensure uniqueness for fileName
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + fileName;
-        // path to folder which contains image.
-        java.nio.file.Path uploadDir = Paths.get("uploads");
-        // check and create folder if it no exists
-        if (!Files.exists(uploadDir)){
-            Files.createDirectories(uploadDir);
-        }
-        // fully path to file
-        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
-        // copy file to destination directory
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-        return uniqueFilename;
-    }
+
 
     @GetMapping("")
     public ResponseEntity<ProductListResponse> getAllProducts(

@@ -1,6 +1,7 @@
 package com.project.shopapp.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.shopapp.models.Category;
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
 import lombok.*;
@@ -21,7 +22,7 @@ public class ProductResponse extends BaseResponse{
     private String description;
 
     @JsonProperty("category_id")
-    private Long categoryId;
+    private Category categoryId;
 
     @JsonProperty("product_images")
     private List<ProductImage> productImages = new ArrayList<>();
@@ -33,7 +34,7 @@ public class ProductResponse extends BaseResponse{
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
-                .categoryId(product.getCategoryId().getId())
+                .categoryId(product.getCategoryId())
                 .productImages(product.getProductImages())
                 .build();
         productResponse.setCreatedAt(product.getCreatedAt());
