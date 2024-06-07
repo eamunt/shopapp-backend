@@ -1,4 +1,4 @@
-package com.project.shopapp.services;
+package com.project.shopapp.services.order;
 
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.models.Order;

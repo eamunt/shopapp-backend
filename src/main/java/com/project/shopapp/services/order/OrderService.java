@@ -1,4 +1,4 @@
-package com.project.shopapp.services;
+package com.project.shopapp.services.order;
 
 import com.project.shopapp.dtos.CartItemDTO;
 import com.project.shopapp.dtos.OrderDTO;
@@ -9,7 +9,6 @@ import com.project.shopapp.repositories.OrderRepository;
 import com.project.shopapp.repositories.ProductRepository;
 import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.responses.OrderResponse;
-import com.project.shopapp.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;

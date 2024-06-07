@@ -1,21 +1,17 @@
-package com.project.shopapp.controller;
+package com.project.shopapp.services.product.controller;
 
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;
-import com.project.shopapp.models.Order;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.OrderListResponse;
 import com.project.shopapp.responses.OrderResponse;
-import com.project.shopapp.responses.ProductListResponse;
-import com.project.shopapp.responses.ProductResponse;
-import com.project.shopapp.services.IOrderService;
-import com.project.shopapp.services.IUserService;
+import com.project.shopapp.services.order.IOrderService;
+import com.project.shopapp.services.user.IUserService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

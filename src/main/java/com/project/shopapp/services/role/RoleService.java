@@ -1,4 +1,4 @@
-package com.project.shopapp.services;
+package com.project.shopapp.services.role;
 
 import com.project.shopapp.models.Role;
 import com.project.shopapp.repositories.RoleRepository;

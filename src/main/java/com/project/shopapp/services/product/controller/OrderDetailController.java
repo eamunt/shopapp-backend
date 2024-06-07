@@ -1,9 +1,9 @@
-package com.project.shopapp.controller;
+package com.project.shopapp.services.product.controller;
 
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDetailDTO;
 import com.project.shopapp.responses.OrderDetailResponse;
-import com.project.shopapp.services.OrderDetailService;
+import com.project.shopapp.services.order.OrderDetailService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

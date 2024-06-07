@@ -1,13 +1,12 @@
-package com.project.shopapp.controller;
+package com.project.shopapp.services.product.controller;
 
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.components.converters.CategoryMessageConverter;
 import com.project.shopapp.dtos.CategoryDTO;
 import com.project.shopapp.models.Category;
 import com.project.shopapp.responses.CategoryListReponse;
-import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.responses.ResponseObject;
-import com.project.shopapp.services.CategoryService;
+import com.project.shopapp.services.category.CategoryService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

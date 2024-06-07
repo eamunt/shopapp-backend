@@ -1,14 +1,9 @@
 package com.project.shopapp.models;
 
-import com.project.shopapp.repositories.ProductImageRepository;
-import com.project.shopapp.repositories.ProductRepository;
-import com.project.shopapp.services.ProductService;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "products")

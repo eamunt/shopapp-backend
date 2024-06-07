@@ -1,8 +1,7 @@
-package com.project.shopapp.controller;
+package com.project.shopapp.services.product.controller;
 
 import com.project.shopapp.models.Category;
-import com.project.shopapp.responses.CategoryListReponse;
-import com.project.shopapp.services.CategoryService;
+import com.project.shopapp.services.category.CategoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

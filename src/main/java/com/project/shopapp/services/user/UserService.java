@@ -1,4 +1,4 @@
-package com.project.shopapp.services;
+package com.project.shopapp.services.user;
 
 import com.project.shopapp.components.JwtTokenUtils;
 import com.project.shopapp.components.LocalizationUtils;

@@ -1,11 +1,11 @@
-package com.project.shopapp.controller;
+package com.project.shopapp.services.product.controller;
 
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
 import com.project.shopapp.repositories.ProductImageRepository;
 import com.project.shopapp.repositories.ProductRepository;
 import com.project.shopapp.responses.ResponseObject;
-import com.project.shopapp.services.ProductService;
+import com.project.shopapp.services.product.ProductService;
 import com.project.shopapp.services.product.image.IProductImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

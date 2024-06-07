@@ -1,4 +1,4 @@
-package com.project.shopapp.controller;
+package com.project.shopapp.services.product.controller;
 
 
 import com.project.shopapp.components.LocalizationUtils;
@@ -10,9 +10,9 @@ import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.LoginResponse;
 import com.project.shopapp.responses.UserResponse;
-import com.project.shopapp.services.ITokenService;
-import com.project.shopapp.services.TokenService;
-import com.project.shopapp.services.UserService;
+import com.project.shopapp.services.token.ITokenService;
+import com.project.shopapp.services.token.TokenService;
+import com.project.shopapp.services.user.UserService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,7 +25,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("${api.prefix}/users")

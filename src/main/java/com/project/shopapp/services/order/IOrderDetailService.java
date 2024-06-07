@@ -1,4 +1,4 @@
-package com.project.shopapp.services;
+package com.project.shopapp.services.order;
 
 import com.project.shopapp.dtos.OrderDetailDTO;
 import com.project.shopapp.responses.OrderDetailResponse;
