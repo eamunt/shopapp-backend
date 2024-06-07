@@ -1,4 +1,4 @@
-package com.project.shopapp.services.product.controller;
+package com.project.shopapp.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.javafaker.Faker;

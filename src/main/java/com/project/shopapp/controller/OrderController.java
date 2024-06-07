@@ -1,4 +1,4 @@
-package com.project.shopapp.services.product.controller;
+package com.project.shopapp.controller;
 
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;

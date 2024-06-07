@@ -1,4 +1,4 @@
-package com.project.shopapp.services.product.controller;
+package com.project.shopapp.controller;
 
 import com.project.shopapp.models.Category;
 import com.project.shopapp.services.category.CategoryService;
