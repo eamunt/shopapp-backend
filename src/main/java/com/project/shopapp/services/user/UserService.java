@@ -6,17 +6,21 @@ import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
+import com.project.shopapp.models.Product;
 import com.project.shopapp.models.Role;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
 import com.project.shopapp.repositories.TokenRepository;
 import com.project.shopapp.repositories.UserRepository;
+import com.project.shopapp.responses.ProductResponse;
 import com.project.shopapp.responses.UserResponse;
 import com.project.shopapp.utils.MessageKeys;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -187,5 +191,22 @@ public class UserService implements IUserService {
         userRepository.save(existingUser);
 
         return modelMapper.map(existingUser, UserResponse.class);
+    }
+
+    @Override
+    public Page<UserResponse> findAll(String keyword, Pageable pageable) throws Exception {
+        Page<User> usersPage;
+        try {
+            usersPage = userRepository.findAll(keyword, pageable);
+
+            // sử dụng modelMapper
+            modelMapper.typeMap(User.class, UserResponse.class);
+            return usersPage.map(f -> modelMapper.map(f, UserResponse.class));
+            // hoặc
+            // return productsPage.map(ProductResponse::fromProduct);
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }

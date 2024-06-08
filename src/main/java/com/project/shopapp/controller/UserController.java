@@ -1,6 +1,7 @@
 package com.project.shopapp.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.RefreshTokenDTO;
 import com.project.shopapp.dtos.UpdateUserDTO;
@@ -8,16 +9,19 @@ import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
-import com.project.shopapp.responses.LoginResponse;
-import com.project.shopapp.responses.UserResponse;
+import com.project.shopapp.responses.*;
 import com.project.shopapp.services.token.ITokenService;
 import com.project.shopapp.services.token.TokenService;
+import com.project.shopapp.services.user.UserRedisService;
 import com.project.shopapp.services.user.UserService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +39,7 @@ public class UserController {
     private final ITokenService ITokenService;
     private final ModelMapper modelMapper;
     private final TokenService tokenService;
+    private final UserRedisService userRedisService;
     @PostMapping("/register")
     public ResponseEntity<?> createUser(
             @Valid @RequestBody UserDTO userDTO,
@@ -162,4 +167,56 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> getAllUser(
+            @RequestParam(defaultValue = "", required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) throws Exception {
+        // create Pageable từ thông tin page và limit
+        // sort: newest on top.
+        PageRequest pageRequest = PageRequest.of(page, limit,
+//                Sort.by("createdAt").descending());
+                Sort.by("id").ascending());
+
+
+
+        // kiểm tra trong redis có tồn tại chưa
+        UserListResponse userListResponse = userRedisService.getAllUser(keyword, pageRequest);
+        int totalPages = 0;
+
+        // nếu chưa tồn tại trong Redis
+        if(userListResponse == null){
+            Page<UserResponse> userPage = userService.findAll(keyword, pageRequest);
+            // get total of pages
+            totalPages = userPage.getTotalPages();
+            List<UserResponse> userResponses = userPage.getContent();
+            userListResponse = UserListResponse
+                    .builder()
+                    .users(userResponses)
+                    .totalPages(totalPages)
+                    .build();
+            userRedisService.saveAllUser(
+                    userListResponse,
+                    keyword,
+                    pageRequest
+            );
+        }
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .message("Get user list successfully")
+                .status(HttpStatus.OK)
+                .data(userListResponse)
+                .build());
+    }
+
+    @GetMapping("/clear")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> clearCache(){
+        userRedisService.clear();
+        return ResponseEntity.ok().body("clear successfully");
+    }
 }
+
+

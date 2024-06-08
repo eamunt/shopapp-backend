@@ -4,6 +4,8 @@ import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.UserResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
 
@@ -15,5 +17,5 @@ public interface IUserService {
     UserResponse getUserDetailsFromToken(String token) throws Exception;
     UserResponse getUserDetailsFromRefreshToken(String refreshToken) throws Exception;
     UserResponse updateUser(Long userId, UpdateUserDTO updateUserDTO) throws Exception;
-
+    Page<UserResponse> findAll(String keyword, Pageable pageable) throws Exception;
 }
