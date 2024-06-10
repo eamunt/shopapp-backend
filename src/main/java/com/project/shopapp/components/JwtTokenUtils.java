@@ -90,10 +90,10 @@ public class JwtTokenUtils {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean validateToken(String token, UserDetails userDetails){
+    public boolean validateToken(String token, User userDetails){
         String phoneNumber = extractPhoneNumber(token);
         Token existingToken = tokenRepository.findByToken(token);
-        if(existingToken == null || existingToken.isRevoked() == true){
+        if(existingToken == null || existingToken.isRevoked() == true || !userDetails.isActive()){
             return false;
         }
         return (phoneNumber.equals(userDetails.getUsername())) &&

@@ -5,6 +5,7 @@ import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
+import com.project.shopapp.exceptions.InvalidPasswordException;
 import com.project.shopapp.exceptions.PermissionDenyException;
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.Role;
@@ -28,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -208,5 +210,27 @@ public class UserService implements IUserService {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(Long userId, String newPassword) throws InvalidPasswordException, DataNotFoundException {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        existingUser.setPassword(encodedPassword);
+        userRepository.save(existingUser);
+        // when reset password then clear token
+        List<Token> tokens = tokenRepository.findByUserId(existingUser);
+        tokenRepository.deleteAll(tokens);
+    }
+
+    @Override
+    @Transactional
+    public void blockOrEnable(Long userId, boolean active) throws DataNotFoundException {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(()-> new DataNotFoundException("User not found"));
+        existingUser.setActive(active);
+        userRepository.save(existingUser);
     }
 }

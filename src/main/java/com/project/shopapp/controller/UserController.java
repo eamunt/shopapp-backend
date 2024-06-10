@@ -7,6 +7,8 @@ import com.project.shopapp.dtos.RefreshTokenDTO;
 import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
+import com.project.shopapp.exceptions.DataNotFoundException;
+import com.project.shopapp.exceptions.InvalidPasswordException;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.*;
@@ -29,6 +31,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("${api.prefix}/users")
@@ -216,6 +219,57 @@ public class UserController {
     public ResponseEntity<?> clearCache(){
         userRedisService.clear();
         return ResponseEntity.ok().body("clear successfully");
+    }
+
+    @PutMapping("reset-password/{userId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> resetPassword(
+            @Valid @PathVariable Long userId
+    ){
+        try {
+            String newPassword = UUID.randomUUID().toString().substring(0,5); // tạo mk mới
+            userService.resetPassword(userId, newPassword);
+            return ResponseEntity.ok(ResponseObject.builder()
+                            .message("Reset password successfully")
+                            .data(newPassword)
+                            .status(HttpStatus.OK)
+                    .build());
+        } catch (InvalidPasswordException e) {
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("Invalid password")
+                    .data("")
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
+        } catch (DataNotFoundException e){
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("User not found")
+                    .data("")
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
+        }
+    }
+
+    @PutMapping("block/{userId}/{active}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> blockOrEnable(
+            @Valid @PathVariable Long userId,
+            @Valid @PathVariable int active
+    ){
+        try {
+            userService.blockOrEnable(userId, active>0);
+            String message  = active > 0 ? "Successfully enabled the user" : "Successfully blocked the user";
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message(message)
+                    .data(null)
+                    .status(HttpStatus.OK)
+                    .build());
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("User not found")
+                    .data(null)
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build());
+        }
     }
 }
 
