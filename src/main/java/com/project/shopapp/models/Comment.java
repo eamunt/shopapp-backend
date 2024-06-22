@@ -6,7 +6,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "comments")
-@Data
+@Data//toString
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,7 +22,7 @@ public class Comment extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
-    private Product productId;
+    private Product product;
 
     // nhiều comment của một user
     @ManyToOne

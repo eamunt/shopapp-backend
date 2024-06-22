@@ -1,0 +1,81 @@
+package com.project.shopapp.controller;
+
+
+import com.project.shopapp.dtos.CommentDTO;
+import com.project.shopapp.responses.CommentResponse;
+import com.project.shopapp.responses.ResponseObject;
+import com.project.shopapp.services.comment.CommentService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("${api.prefix}/comments")
+@RequiredArgsConstructor
+public class CommentController {
+    private final CommentService commentService;
+
+    @GetMapping("")
+    public ResponseEntity<ResponseObject> getAllComments(
+            @RequestParam(value = "user_id", required = false) Long userId,
+            @RequestParam("product_id") Long productId
+    ){
+        List<CommentResponse> commentResponses;
+        if(userId == null) {
+            commentResponses = commentService.getCommentsByProduct(productId);
+        }else {
+            commentResponses = commentService.getCommentsByUserAndProduct(userId, productId);
+        }
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Get comments successfully")
+                        .status(HttpStatus.OK)
+                        .data(commentResponses)
+                        .build());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> updateComment(
+            @PathVariable("id") Long commentId,
+            @Valid @RequestBody CommentDTO commentDTO
+    ) throws Exception {
+        commentService.updateComment(commentId, commentDTO);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .message("Comment updated successfully")
+                .status(HttpStatus.OK)
+                .data(commentDTO.getContent())
+                .build());
+    }
+
+    @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> insertCommnet(
+            @Valid @RequestBody CommentDTO commentDTO
+    ){
+        commentService.insertComment(commentDTO);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .message("Inser Comment Successfully")
+                .status(HttpStatus.OK)
+                .data(commentDTO.getContent())
+                .build());
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> deleteComment(
+            @PathVariable("id") Long commentId
+    ) throws Exception {
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .message("Delete comment successfully")
+                .status(HttpStatus.OK)
+                .build());
+    }
+
+
+}
