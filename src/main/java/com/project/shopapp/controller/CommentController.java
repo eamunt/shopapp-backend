@@ -1,7 +1,9 @@
 package com.project.shopapp.controller;
 
 
+import com.project.shopapp.components.SecurityUtils;
 import com.project.shopapp.dtos.CommentDTO;
+import com.project.shopapp.models.User;
 import com.project.shopapp.responses.CommentResponse;
 import com.project.shopapp.responses.ResponseObject;
 import com.project.shopapp.services.comment.CommentService;
@@ -13,12 +15,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("${api.prefix}/comments")
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping("")
     public ResponseEntity<ResponseObject> getAllComments(
@@ -44,6 +48,17 @@ public class CommentController {
             @PathVariable("id") Long commentId,
             @Valid @RequestBody CommentDTO commentDTO
     ) throws Exception {
+        // kiểm tra người dùng hiện tại
+        User loggedInUser = securityUtils.getLoggedInUser();
+        if(!Objects.equals(loggedInUser.getId(), commentDTO.getUserId())) {
+            return ResponseEntity.badRequest().body(
+                    new ResponseObject(
+                            "You can not update another user's comment",
+                            HttpStatus.BAD_REQUEST,
+                            null
+                    )
+            );
+        }
         commentService.updateComment(commentId, commentDTO);
         return ResponseEntity.ok().body(ResponseObject.builder()
                 .message("Comment updated successfully")
@@ -57,6 +72,16 @@ public class CommentController {
     public ResponseEntity<ResponseObject> insertCommnet(
             @Valid @RequestBody CommentDTO commentDTO
     ){
+        User loggedInUser = securityUtils.getLoggedInUser();
+        if(!Objects.equals(loggedInUser.getId(), commentDTO.getUserId())) {
+            return ResponseEntity.badRequest().body(
+                    new ResponseObject(
+                            "You can not comment as another user",
+                            HttpStatus.BAD_REQUEST,
+                            null
+                    )
+            );
+        }
         commentService.insertComment(commentDTO);
         return ResponseEntity.ok().body(ResponseObject.builder()
                 .message("Inser Comment Successfully")
