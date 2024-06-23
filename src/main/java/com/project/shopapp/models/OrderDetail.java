@@ -1,5 +1,6 @@
 package com.project.shopapp.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -39,5 +40,8 @@ public class OrderDetail {
     @Column(name = "color")
     private String color;
 
-
+    @ManyToOne
+    @JoinColumn(name = "coupon_id", nullable = false)
+    @JsonBackReference
+    private Coupon coupon;
 }

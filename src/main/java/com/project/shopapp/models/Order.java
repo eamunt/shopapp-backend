@@ -1,5 +1,6 @@
 package com.project.shopapp.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -70,5 +71,10 @@ public class Order extends BaseEntity{
     @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @JsonManagedReference
     private List<OrderDetail> orderDetails;
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_id", nullable = false)
+    @JsonBackReference
+    private Coupon coupon = null;
 
 }
