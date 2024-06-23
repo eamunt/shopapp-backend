@@ -1,7 +1,6 @@
 package com.project.shopapp.repositories;
 
 import com.project.shopapp.models.User;
-import com.project.shopapp.responses.UserResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

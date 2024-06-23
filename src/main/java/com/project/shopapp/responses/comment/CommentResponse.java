@@ -1,6 +1,7 @@
-package com.project.shopapp.responses;
+package com.project.shopapp.responses.comment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.shopapp.responses.user.UserResponse;
 import lombok.*;
 
 import java.time.LocalDateTime;

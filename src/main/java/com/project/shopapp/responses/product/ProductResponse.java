@@ -1,9 +1,10 @@
-package com.project.shopapp.responses;
+package com.project.shopapp.responses.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.shopapp.models.Category;
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
+import com.project.shopapp.responses.BaseResponse;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductResponse extends BaseResponse{
+public class ProductResponse extends BaseResponse {
     private Long id;
     private String name;
     private float price;

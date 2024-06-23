@@ -1,8 +1,7 @@
 package com.project.shopapp.services.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.project.shopapp.responses.ProductListResponse;
-import com.project.shopapp.responses.UserListResponse;
+import com.project.shopapp.responses.user.UserListResponse;
 import org.springframework.data.domain.PageRequest;
 
 public interface IUserRedisService {

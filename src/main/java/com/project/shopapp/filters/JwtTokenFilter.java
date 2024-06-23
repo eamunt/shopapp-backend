@@ -99,6 +99,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of(String.format("%s/users/login", apiPrefix), "POST"),
                 Pair.of(String.format("%s/users/refreshToken", apiPrefix), "POST"),
                 Pair.of(String.format("%s/comments", apiPrefix), "GET"),
+                Pair.of(String.format("%s/coupons", apiPrefix), "GET"),
 
 
                 // Swagger

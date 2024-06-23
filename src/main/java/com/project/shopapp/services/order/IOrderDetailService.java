@@ -1,7 +1,7 @@
 package com.project.shopapp.services.order;
 
 import com.project.shopapp.dtos.OrderDetailDTO;
-import com.project.shopapp.responses.OrderDetailResponse;
+import com.project.shopapp.responses.order.OrderDetailResponse;
 
 import java.util.List;
 

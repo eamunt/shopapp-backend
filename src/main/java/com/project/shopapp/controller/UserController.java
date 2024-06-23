@@ -1,7 +1,6 @@
 package com.project.shopapp.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.RefreshTokenDTO;
 import com.project.shopapp.dtos.UpdateUserDTO;
@@ -12,6 +11,9 @@ import com.project.shopapp.exceptions.InvalidPasswordException;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.*;
+import com.project.shopapp.responses.user.LoginResponse;
+import com.project.shopapp.responses.user.UserListResponse;
+import com.project.shopapp.responses.user.UserResponse;
 import com.project.shopapp.services.token.ITokenService;
 import com.project.shopapp.services.token.TokenService;
 import com.project.shopapp.services.user.UserRedisService;

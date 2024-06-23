@@ -1,9 +1,8 @@
 package com.project.shopapp.services.order;
 
 import com.project.shopapp.dtos.OrderDTO;
-import com.project.shopapp.models.Order;
 import com.project.shopapp.models.User;
-import com.project.shopapp.responses.OrderResponse;
+import com.project.shopapp.responses.order.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

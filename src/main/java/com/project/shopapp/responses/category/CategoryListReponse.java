@@ -1,4 +1,4 @@
-package com.project.shopapp.responses;
+package com.project.shopapp.responses.category;
 
 import com.project.shopapp.models.Category;
 import lombok.AllArgsConstructor;

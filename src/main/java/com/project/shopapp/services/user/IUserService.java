@@ -5,11 +5,9 @@ import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.InvalidPasswordException;
 import com.project.shopapp.models.User;
-import com.project.shopapp.responses.UserResponse;
+import com.project.shopapp.responses.user.UserResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.Map;
 
 public interface IUserService {
     User createUser(UserDTO userDTO) throws Exception;
