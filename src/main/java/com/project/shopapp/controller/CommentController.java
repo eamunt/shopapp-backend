@@ -85,7 +85,7 @@ public class CommentController {
         commentService.insertComment(commentDTO);
         return ResponseEntity.ok().body(ResponseObject.builder()
                 .message("Inser Comment Successfully")
-                .status(HttpStatus.OK)
+                .status(HttpStatus.CREATED)
                 .data(commentDTO.getContent())
                 .build());
     }

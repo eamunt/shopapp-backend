@@ -9,8 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    Optional<Order> findOrderById(Long id);
     // Find the orders of any user.
     List<Order> findByUserId(User userId);
 

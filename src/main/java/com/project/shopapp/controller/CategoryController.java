@@ -41,20 +41,21 @@ public class CategoryController {
                     .stream()
                     .map(fieldError -> fieldError.getDefaultMessage())
                     .toList();
-            return ResponseEntity.badRequest().body(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_FAILED));
+            return ResponseEntity.ok()
+                    .body(ResponseObject.builder()
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_FAILED))
+                            .status(HttpStatus.BAD_REQUEST)
+                            .data(null)
+                            .build());
         }
         Category category = categoryService.createCategory(categoryDTO);
-        if(category == null){
-            return ResponseEntity.ok(ResponseObject.builder()
-                    .message("Duplicate category")
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build());
-        }
+
         this.kafkaTemplate.send("insert-a-category", category);
         this.kafkaTemplate.setMessageConverter(new CategoryMessageConverter());
         return ResponseEntity.ok(ResponseObject.builder()
                 .message(localizationUtils.getLocalizedMessage(MessageKeys.CREATE_CATEGORY_SUCCESSFULLY))
-                .status(HttpStatus.OK)
+                .status(HttpStatus.CREATED)
+                .data(null)
                 .build());
     }
 
@@ -72,7 +73,7 @@ public class CategoryController {
 
     // display all categories
     @GetMapping("")
-    public ResponseEntity<CategoryListReponse> getAllCategories(
+    public ResponseEntity<ResponseObject> getAllCategories(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit
     ){
@@ -84,9 +85,10 @@ public class CategoryController {
         int totalPages = categoryPage.getTotalPages();
         List<Category> categories = categoryPage.getContent();
         this.kafkaTemplate.send("get-all-categories", categories);
-        return ResponseEntity.ok(CategoryListReponse.builder()
-                .categories(categories)
-                .totalPage(totalPages)
+        return ResponseEntity.ok(ResponseObject.builder()
+                        .message("Get list of categories successfully")
+                        .status(HttpStatus.OK)
+                        .data(categories)
                 .build());
     }
 
@@ -105,17 +107,10 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseObject> deleteCategory(@PathVariable Long id){
-        try {
-            categoryService.deleteCategory(id);
-            return ResponseEntity.ok(ResponseObject.builder()
-                    .message(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_CATEGORY_SUCCESSFULLY, String.valueOf(id)))
-                    .status(HttpStatus.OK)
-                    .build());
-        }catch (Exception e){
-            return ResponseEntity.ok(ResponseObject.builder()
-                    .message(e.getMessage())
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build());
-        }
+        categoryService.deleteCategory(id);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_CATEGORY_SUCCESSFULLY, String.valueOf(id)))
+                .status(HttpStatus.OK)
+                .build());
     }
 }

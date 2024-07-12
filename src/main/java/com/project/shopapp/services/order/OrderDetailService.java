@@ -27,7 +27,7 @@ public class OrderDetailService implements IOrderDetailService{
     @Override
     @Transactional
     public OrderDetailResponse createOrderDetail(OrderDetailDTO orderDetailDTO) throws Exception {
-        Order existingOrder = orderRepository.findById(orderDetailDTO.getOrderId())
+        Order existingOrder = orderRepository.findOrderById(orderDetailDTO.getOrderId())
                 .orElseThrow(() -> new DataNotFoundException("Order not found: " + orderDetailDTO.getOrderId()));
         Product existingProduct = productRepository.findById(orderDetailDTO.getProductId())
                 .orElseThrow(() -> new DataNotFoundException("Product not found: "+orderDetailDTO.getProductId()));
@@ -62,7 +62,7 @@ public class OrderDetailService implements IOrderDetailService{
     @Override
     public OrderDetailResponse getOrderDetail(Long id) throws Exception {
         modelMapper.typeMap(OrderDetail.class, OrderDetailResponse.class);
-        OrderDetail orderDetail = orderDetailRepository.findById(id)
+        OrderDetail orderDetail = orderDetailRepository.findOrderDetailById(id)
                 .orElseThrow(() -> new DataNotFoundException("Not found OrderDetail for id " + id));
         return modelMapper.map(orderDetail, OrderDetailResponse.class);
     }
@@ -73,9 +73,9 @@ public class OrderDetailService implements IOrderDetailService{
             Long id,
             OrderDetailDTO orderDetailDTO) throws Exception
     {
-        OrderDetail existingOrderDetail = orderDetailRepository.findById(id)
+        OrderDetail existingOrderDetail = orderDetailRepository.findOrderDetailById(id)
                 .orElseThrow(() -> new DataNotFoundException("OrderDetail not found " + id));
-        Order existingOrder = orderRepository.findById(orderDetailDTO.getOrderId())
+        Order existingOrder = orderRepository.findOrderById(orderDetailDTO.getOrderId())
                 .orElseThrow(() -> new DataNotFoundException("Order not found " + orderDetailDTO.getOrderId()));
         Product existingProduct = productRepository.findById(orderDetailDTO.getProductId())
                 .orElseThrow(() -> new DataNotFoundException("Product not found " + orderDetailDTO.getProductId()));
@@ -119,7 +119,7 @@ public class OrderDetailService implements IOrderDetailService{
     @Override
     public List<OrderDetailResponse> findByOrderId(Long orderId) throws Exception {
         modelMapper.typeMap(OrderDetail.class, OrderDetailResponse.class);
-        Order existingOrder = orderRepository.findById(orderId)
+        Order existingOrder = orderRepository.findOrderById(orderId)
                 .orElseThrow(() -> new DataNotFoundException("Order not found" + orderId));
         List<OrderDetail> tmp = orderDetailRepository.findByOrderId(existingOrder);
         return tmp.stream()

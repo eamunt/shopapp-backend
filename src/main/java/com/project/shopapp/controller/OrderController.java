@@ -3,7 +3,7 @@ package com.project.shopapp.controller;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.models.User;
-import com.project.shopapp.responses.order.OrderListResponse;
+import com.project.shopapp.responses.ResponseObject;
 import com.project.shopapp.responses.order.OrderResponse;
 import com.project.shopapp.services.order.IOrderService;
 import com.project.shopapp.services.user.IUserService;
@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -29,45 +30,48 @@ public class OrderController {
     private final LocalizationUtils localizationUtils;
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    public ResponseEntity<?> createOrder(
+    public ResponseEntity<ResponseObject> createOrder(
             @RequestBody @Valid OrderDTO orderDTO,
-            BindingResult result) {
-        try {
-            if(result.hasErrors()) {
-                List<String> errorMessages = result.getFieldErrors()
-                        .stream()
-                        .map(fieldError -> fieldError.getDefaultMessage())
-                        .toList();
-                return ResponseEntity.badRequest().body(errorMessages);
-            }
-            OrderResponse newOrder = orderService.createOrder(orderDTO);
-            return ResponseEntity.ok().body(newOrder);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            BindingResult result) throws Exception{
+        if(result.hasErrors()) {
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(fieldError -> fieldError.getDefaultMessage())
+                    .toList();
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                            .message(String.join(";", errorMessages))
+                            .status(HttpStatus.BAD_REQUEST)
+                    .build());
         }
+        OrderResponse newOrder = orderService.createOrder(orderDTO);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Insert order successfully")
+                        .status(HttpStatus.CREATED)
+                        .data(newOrder)
+                .build());
     }
 
     @GetMapping("/user/{user_id}")
     // GET: http://localhost:8088/api/v1/orders/user/4
-    public ResponseEntity<?> getUserOrders(@Valid @PathVariable("user_id") Long userId) {
-        try {
-            User existingUser = userService.findUserById(userId);
-            List<OrderResponse> orderList = orderService.findByUserId(existingUser);
-            return ResponseEntity.ok().body(orderList);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<ResponseObject> getUserOrders(@Valid @PathVariable("user_id") Long userId) throws Exception {
+        User existingUser = userService.findUserById(userId);
+        List<OrderResponse> orderList = orderService.findByUserId(existingUser);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Get list of orders successfully")
+                        .status(HttpStatus.OK)
+                        .data(orderList)
+                .build());
     }
 
     @GetMapping("/{orderId}")
     // GET: http://localhost:8088/api/v1/orders/4
-    public ResponseEntity<?> getOrder(@Valid @PathVariable("orderId") Long orderId) {
-        try {
-            OrderResponse existingOrder = orderService.getOrder(orderId);
-            return ResponseEntity.ok().body(existingOrder);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<ResponseObject> getOrder(@Valid @PathVariable("orderId") Long orderId) throws Exception{
+        OrderResponse existingOrder = orderService.getOrder(orderId);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Get order successfully")
+                        .status(HttpStatus.OK)
+                        .data(existingOrder)
+                .build());
     }
 
     // Put
@@ -77,29 +81,29 @@ public class OrderController {
     public ResponseEntity<?> updateOrder(
             @Valid @PathVariable("idOrder") Long id,
             @Valid @RequestBody OrderDTO orderDTO
-    ){
-        try {
-            OrderResponse updatedOrder = orderService.updateOrder(id, orderDTO);
-            return ResponseEntity.ok().body(updatedOrder);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    ) throws Exception{
+        OrderResponse updatedOrder = orderService.updateOrder(id, orderDTO);
+        return ResponseEntity.ok().body(new ResponseObject("Update order successfully", HttpStatus.OK, updatedOrder));
     }
 
     // Delete
     @DeleteMapping("/{orderId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteOrder(
+    public ResponseEntity<ResponseObject> deleteOrder(
             @Valid @PathVariable("orderId") Long orderId
-    ){
+    ) throws Exception{
         orderService.deleteOrder(orderId);
         // update status field => false.
-        return ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY, String.valueOf(orderId)));
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY, String.valueOf(orderId)))
+                        .status(HttpStatus.OK)
+                        .data(null)
+                .build());
     }
 
     @GetMapping("/get-orders-by-keyword")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<OrderListResponse> getOrdersByKeyword(@RequestParam(defaultValue = "") String keyword,
+    public ResponseEntity<ResponseObject> getOrdersByKeyword(@RequestParam(defaultValue = "") String keyword,
                                                                 @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int limit
     ){// create Pageable từ thông tin page và limit
@@ -113,10 +117,10 @@ public class OrderController {
         int totalPages = orderPage.getTotalPages();
         List<OrderResponse> orders = orderPage.getContent();
 
-        return ResponseEntity.ok(OrderListResponse
-                .builder()
-                .orders(orders)
-                .totalPages(totalPages)
+        return ResponseEntity.ok(ResponseObject.builder()
+                        .message("Get orders successfully")
+                        .status(HttpStatus.OK)
+                        .data(orders)
                 .build());
     }
 

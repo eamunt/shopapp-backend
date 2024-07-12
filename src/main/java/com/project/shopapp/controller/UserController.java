@@ -46,29 +46,37 @@ public class UserController {
     private final TokenService tokenService;
     private final UserRedisService userRedisService;
     @PostMapping("/register")
-    public ResponseEntity<?> createUser(
+    public ResponseEntity<ResponseObject> createUser(
             @Valid @RequestBody UserDTO userDTO,
-            BindingResult result) {
-        try {
-            if(result.hasErrors()){
-                List<String> errorMessages = result.getFieldErrors()
-                        .stream()
-                        .map(fieldError -> fieldError.getDefaultMessage())
-                        .toList();
-                return ResponseEntity.badRequest().body(errorMessages);
-            }
-
-            if(!userDTO.getPassword().equals(userDTO.getRetypePassword())){
-                return ResponseEntity.badRequest().body(localizationUtils.getLocalizedMessage(MessageKeys.PASSWORD_NOT_MATCH));
-            }
-
-
-            User newUser = userService.createUser(userDTO);
-
-            return ResponseEntity.ok(newUser);
-        }catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            BindingResult result) throws Exception{
+        if(result.hasErrors()){
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(fieldError -> fieldError.getDefaultMessage())
+                    .toList();
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                            .message(errorMessages.toString())
+                            .status(HttpStatus.BAD_REQUEST)
+                            .data(null)
+                    .build());
         }
+
+        if(!userDTO.getPassword().equals(userDTO.getRetypePassword())){
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.PASSWORD_NOT_MATCH))
+                            .status(HttpStatus.BAD_REQUEST)
+                            .data(null)
+                    .build());
+        }
+
+
+        User newUser = userService.createUser(userDTO);
+
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Create new user successfully")
+                        .status(HttpStatus.CREATED)
+                        .data(newUser)
+                .build());
     }
 
     private boolean isMobileDevice(String userAgent) {
@@ -77,7 +85,7 @@ public class UserController {
     }
 
     @PostMapping("/refreshToken")
-    public ResponseEntity<LoginResponse> refreshToken(
+    public ResponseEntity<ResponseObject> refreshToken(
             @Valid @RequestBody RefreshTokenDTO refreshTokenDTO
             ) throws Exception {
         UserResponse userDetail = userService.getUserDetailsFromRefreshToken(refreshTokenDTO.getRefreshToken());
@@ -95,82 +103,79 @@ public class UserController {
                 .roles(user.getRoleId())
                 .id(user.getId())
                 .build();
-        return ResponseEntity.ok().body(
-                loginResponse
-        );
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Refresh Token successfully")
+                        .status(HttpStatus.OK)
+                        .data(loginResponse)
+                .build());
 
 
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
+    public ResponseEntity<ResponseObject> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO,
-            HttpServletRequest request)
+            HttpServletRequest request) throws Exception
     {
         // Kiểm tra thông tin đăng nhập và sinh ra token
-        try {
-            String token = userService.login(
-                    userLoginDTO.getPhoneNumber(),
-                    userLoginDTO.getPassword(),
-                    userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId()
-            );
-            String userAgent = request.getHeader("User-Agent");
-            UserResponse userDetail = userService.getUserDetailsFromToken(token);
+        String token = userService.login(
+                userLoginDTO.getPhoneNumber(),
+                userLoginDTO.getPassword(),
+                userLoginDTO.getRoleId() == null ? 1 : userLoginDTO.getRoleId()
+        );
+        String userAgent = request.getHeader("User-Agent");
+        UserResponse userDetail = userService.getUserDetailsFromToken(token);
 
-            modelMapper.typeMap(UserResponse.class, User.class);
-            User user = modelMapper.map(userDetail, User.class);
-            Token jwtToken = ITokenService.addToken(user, token, isMobileDevice(userAgent));
-
-            return ResponseEntity.ok().body(LoginResponse.builder()
-                            .tokenType(jwtToken.getTokenType())
-                            .id(user.getId())
-                            .username(user.getUsername())
-                            .roles(user.getRoleId())
-                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
-                            .token(jwtToken.getToken())
-                            .refreshToken(jwtToken.getRefreshToken())
-                    .build()
-            );
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(LoginResponse.builder()
-                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
-                    .build()
-            );
-        }
-        // Return token in response
+        modelMapper.typeMap(UserResponse.class, User.class);
+        User user = modelMapper.map(userDetail, User.class);
+        Token jwtToken = ITokenService.addToken(user, token, isMobileDevice(userAgent));
+        LoginResponse loginResponse = LoginResponse.builder()
+                .tokenType(jwtToken.getTokenType())
+                .id(user.getId())
+                .username(user.getUsername())
+                .roles(user.getRoleId())
+                .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
+                .token(jwtToken.getToken())
+                .refreshToken(jwtToken.getRefreshToken())
+                .build();
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .message("Login successfully")
+                .status(HttpStatus.OK)
+                .data(loginResponse)
+                .build());
     }
 
     @PostMapping ("/details")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    public ResponseEntity<UserResponse> getUserDetails(@RequestHeader("Authorization") String authorizationHeader){
-        try {
-            String extractedToken = authorizationHeader.substring(7);
-            UserResponse user = userService.getUserDetailsFromToken(extractedToken);
-            return ResponseEntity.ok().body(user);
-        }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ResponseObject> getUserDetails(@RequestHeader("Authorization") String authorizationHeader) throws Exception{
+        String extractedToken = authorizationHeader.substring(7);
+        UserResponse user = userService.getUserDetailsFromToken(extractedToken);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .message("Get user details successfully")
+                .status(HttpStatus.OK)
+                .data(user)
+                .build());
     }
 
     @PutMapping("/details/{userId}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    public ResponseEntity<?> updateUserDetails(
+    public ResponseEntity<ResponseObject> updateUserDetails(
             @PathVariable Long userId,
             @RequestBody UpdateUserDTO updatedUserDTO,
             @RequestHeader("Authorization") String authorizationHeader
-    ){
-        try{
-            String extractedToken = authorizationHeader.substring(7);
-            UserResponse user = userService.getUserDetailsFromToken(extractedToken);
+    )throws Exception{
+        String extractedToken = authorizationHeader.substring(7);
+        UserResponse user = userService.getUserDetailsFromToken(extractedToken);
 
-            if(user.getId() != userId){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            UserResponse updatedUser = userService.updateUser(userId, updatedUserDTO);
-            return ResponseEntity.ok().body(updatedUser);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+        if(user.getId() != userId){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        UserResponse updatedUser = userService.updateUser(userId, updatedUserDTO);
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                        .message("Update User Details successfully")
+                        .status(HttpStatus.OK)
+                        .data(updatedUser)
+                .build());
     }
 
     @GetMapping("")

@@ -101,7 +101,7 @@ public class OrderService implements IOrderService{
     @Override
     public OrderResponse getOrder(Long orderId) throws Exception {
         modelMapper.typeMap(Order.class, OrderResponse.class);
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findOrderById(orderId)
                 .orElseThrow(() -> new DataNotFoundException("Order with id: " + orderId + " not found"));
         return modelMapper.map(order, OrderResponse.class);
     }
@@ -109,7 +109,7 @@ public class OrderService implements IOrderService{
     @Override
     @Transactional
     public OrderResponse updateOrder(Long orderId, OrderDTO orderDTO) throws Exception{
-        Order existingOrder = orderRepository.findById(orderId)
+        Order existingOrder = orderRepository.findOrderById(orderId)
                 .orElseThrow(() -> new DataNotFoundException("Order with id: " + orderId + " not found"));
         User existingUser = userRepository.findById(orderDTO.getUserId())
                 .orElseThrow(() -> new DataNotFoundException("Order with id: " + orderId + " not found"));
@@ -127,10 +127,10 @@ public class OrderService implements IOrderService{
 
     @Override
     @Transactional
-    public void deleteOrder(Long orderId) {
+    public void deleteOrder(Long orderId) throws Exception{
         // soft-delete not hard-delete
-        Order existingOrder = orderRepository.findById(orderId)
-                .orElse(null);
+        Order existingOrder = orderRepository.findOrderById(orderId)
+                .orElseThrow(() -> new DataNotFoundException("Order with id: " + orderId + " not found"));
         if(existingOrder != null){
             existingOrder.setActive(false);
             orderRepository.save(existingOrder);

@@ -19,9 +19,10 @@ public class CategoryService implements ICategoryService{
     @Transactional
     public Category createCategory(CategoryDTO categoryDTO) {
         Category check = categoryRepository.findByName(categoryDTO.getName());
-        if(check != null) {
-            return null;
-        }
+        // đã sử dụng Global exception nên không cần mã bên dưới.
+//        if(check != null) {
+//            return null;
+//        }
         Category newCategory = Category
                 .builder()
                 .name(categoryDTO.getName())

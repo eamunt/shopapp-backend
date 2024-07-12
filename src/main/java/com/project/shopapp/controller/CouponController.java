@@ -21,24 +21,14 @@ public class CouponController {
             @RequestParam("couponCode") String couponCode,
             @RequestParam("totalAmount") double totalAmount
     ) {
-        try {
-            double finalAmount = couponService.calculateCouponValue(couponCode, totalAmount);
-            CouponCalculationResponse couponCalculationResponse = CouponCalculationResponse.builder()
-                    .result(finalAmount)
-                    .build();
-            return ResponseEntity.ok(new ResponseObject(
-                    "Calculate coupon successfully",
-                    HttpStatus.OK,
-                    couponCalculationResponse
-            ));
-        }catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    new ResponseObject(
-                            e.getMessage(),
-                            HttpStatus.BAD_REQUEST,
-                            null
-                    )
-            );
-        }
+        double finalAmount = couponService.calculateCouponValue(couponCode, totalAmount);
+        CouponCalculationResponse couponCalculationResponse = CouponCalculationResponse.builder()
+                .result(finalAmount)
+                .build();
+        return ResponseEntity.ok(new ResponseObject(
+                "Calculate coupon successfully",
+                HttpStatus.OK,
+                couponCalculationResponse
+        ));
     }
 }
