@@ -5,14 +5,18 @@ import com.project.shopapp.dtos.ProductImageDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.InvalidParamException;
 import com.project.shopapp.models.Category;
+import com.project.shopapp.models.Order;
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
 import com.project.shopapp.repositories.CategoryRepository;
 import com.project.shopapp.repositories.ProductImageRepository;
 import com.project.shopapp.repositories.ProductRepository;
+import com.project.shopapp.responses.order.OrderResponse;
 import com.project.shopapp.responses.product.ProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,10 +29,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +76,14 @@ public class ProductService implements IProductService{
             productsPage = productRepository.searchProducts(category_id, keyword, pageRequest);
 
             // sử dụng modelMapper
-            modelMapper.typeMap(Product.class, ProductResponse.class);
+            TypeMap<Product, ProductResponse> typeMap = modelMapper.typeMap(Product.class, ProductResponse.class);
+
+            typeMap.addMappings(mapper -> {
+                // Add a custom converter for the createdDate field
+                mapper.using(localDateTimeToDateConverter).map(Product::getCreatedAt, ProductResponse::setCreatedAt);
+                mapper.using(localDateTimeToDateConverter).map(Product::getUpdatedAt, ProductResponse::setUpdatedAt);
+
+            });
             return productsPage.map(f -> modelMapper.map(f, ProductResponse.class));
             // hoặc
             // return productsPage.map(ProductResponse::fromProduct);
@@ -82,6 +92,10 @@ public class ProductService implements IProductService{
         }
         return null;
     }
+    Converter<LocalDateTime, Date> localDateTimeToDateConverter = context -> {
+        LocalDateTime source = context.getSource();
+        return Date.from(source.atZone(ZoneId.systemDefault()).toInstant());
+    };
 
     @Override
     @Transactional
