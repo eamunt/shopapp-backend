@@ -6,6 +6,7 @@ import com.project.shopapp.dtos.CategoryDTO;
 import com.project.shopapp.models.Category;
 import com.project.shopapp.responses.category.CategoryListReponse;
 import com.project.shopapp.responses.ResponseObject;
+import com.project.shopapp.responses.order.OrderListResponse;
 import com.project.shopapp.services.category.CategoryService;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
@@ -84,11 +85,17 @@ public class CategoryController {
         // get total of pages
         int totalPages = categoryPage.getTotalPages();
         List<Category> categories = categoryPage.getContent();
+        CategoryListReponse categoryListReponse;
+        categoryListReponse = CategoryListReponse
+                .builder()
+                .categories(categories)
+                .totalPages(totalPages)
+                .build();
         this.kafkaTemplate.send("get-all-categories", categories);
         return ResponseEntity.ok(ResponseObject.builder()
                         .message("Get list of categories successfully")
                         .status(HttpStatus.OK)
-                        .data(categories)
+                        .data(categoryListReponse)
                 .build());
     }
 

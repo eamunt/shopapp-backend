@@ -14,5 +14,5 @@ import java.util.List;
 @Builder
 public class CategoryListReponse {
     private List<Category> categories;
-    private int totalPage;
+    private int totalPages;
 }

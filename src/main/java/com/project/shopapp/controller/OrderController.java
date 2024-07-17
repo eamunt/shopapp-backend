@@ -4,7 +4,9 @@ import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.ResponseObject;
+import com.project.shopapp.responses.order.OrderListResponse;
 import com.project.shopapp.responses.order.OrderResponse;
+import com.project.shopapp.responses.product.ProductListResponse;
 import com.project.shopapp.services.order.IOrderService;
 import com.project.shopapp.services.user.IUserService;
 import com.project.shopapp.utils.MessageKeys;
@@ -111,16 +113,23 @@ public class OrderController {
         PageRequest pageRequest = PageRequest.of(page, limit,
 //                Sort.by("createdAt").descending());
                 Sort.by("id").ascending());
+        OrderListResponse orderListResponse;
 
         Page<OrderResponse> orderPage = orderService.getOrdersByKeyword(keyword, pageRequest);
         // get total of pages
         int totalPages = orderPage.getTotalPages();
         List<OrderResponse> orders = orderPage.getContent();
 
+        orderListResponse = OrderListResponse
+                .builder()
+                .orders(orders)
+                .totalPages(totalPages)
+                .build();
+
         return ResponseEntity.ok(ResponseObject.builder()
                         .message("Get orders successfully")
                         .status(HttpStatus.OK)
-                        .data(orders)
+                        .data(orderListResponse)
                 .build());
     }
 
