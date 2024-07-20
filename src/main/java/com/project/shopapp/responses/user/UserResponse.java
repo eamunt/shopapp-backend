@@ -27,4 +27,8 @@ public class UserResponse {
     private int googleAccountId;
     @JsonProperty("role_id")
     private Role roleId;
+    @JsonProperty("created_at")
+    private Date createdAt;
+    @JsonProperty("updated_at")
+    private Date updatedAt;
 }

@@ -40,7 +40,7 @@ spring:
   data:
     redis:
       # true: để sử dụng, false: để không sử dụng
-      use-redis-cache: true
+      use-redis-cache: false
       host: ${REDIS_HOST:localhost} #default to 'localhost' if not provided
       port: ${REDIS_PORT:6379} #default to '6379' if not provided
 

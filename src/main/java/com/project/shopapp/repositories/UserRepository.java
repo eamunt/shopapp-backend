@@ -13,10 +13,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneNumber(String phoneNumber);
     Optional<User> findByPhoneNumber(String phoneNumber);
 
-    @Query("SELECT o FROM User o WHERE o.active = true AND (:keyword IS NULL OR :keyword = '' OR " +
+    @Query("SELECT o FROM User o WHERE (:keyword IS NULL OR :keyword = '' OR " +
             "o.fullName LIKE %:keyword% " +
             "OR o.address LIKE %:keyword% " +
             "OR o.phoneNumber LIKE %:keyword%) " +
             "AND LOWER(o.roleId.name) = 'user'")
     Page<User> findAll(@Param("keyword") String keyword, Pageable pageable);
+
+//    @Query("SELECT o FROM User o WHERE o.active = true AND (:keyword IS NULL OR :keyword = '' OR " +
+//            "o.fullName LIKE %:keyword% " +
+//            "OR o.address LIKE %:keyword% " +
+//            "OR o.phoneNumber LIKE %:keyword%) " +
+//            "AND LOWER(o.roleId.name) = 'user'")
+//    Page<User> findAll(@Param("keyword") String keyword, Pageable pageable);
 }

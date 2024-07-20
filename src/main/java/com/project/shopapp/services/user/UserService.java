@@ -7,16 +7,20 @@ import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.InvalidPasswordException;
 import com.project.shopapp.exceptions.PermissionDenyException;
+import com.project.shopapp.models.Product;
 import com.project.shopapp.models.Role;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
 import com.project.shopapp.repositories.TokenRepository;
 import com.project.shopapp.repositories.UserRepository;
+import com.project.shopapp.responses.product.ProductResponse;
 import com.project.shopapp.responses.user.UserResponse;
 import com.project.shopapp.utils.MessageKeys;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +31,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -200,7 +207,15 @@ public class UserService implements IUserService {
             usersPage = userRepository.findAll(keyword, pageable);
 
             // sử dụng modelMapper
-            modelMapper.typeMap(User.class, UserResponse.class);
+            TypeMap<User, UserResponse> typeMap = modelMapper.typeMap(User.class, UserResponse.class);
+
+            typeMap.addMappings(mapper -> {
+                // Add a custom converter for the createdDate field
+                mapper.using(localDateTimeToDateConverter).map(User::getCreatedAt, UserResponse::setCreatedAt);
+                mapper.using(localDateTimeToDateConverter).map(User::getUpdatedAt, UserResponse::setUpdatedAt);
+
+            });
+
             return usersPage.map(f -> modelMapper.map(f, UserResponse.class));
             // hoặc
             // return productsPage.map(ProductResponse::fromProduct);
@@ -209,6 +224,11 @@ public class UserService implements IUserService {
         }
         return null;
     }
+
+    Converter<LocalDateTime, Date> localDateTimeToDateConverter = context -> {
+        LocalDateTime source = context.getSource();
+        return Date.from(source.atZone(ZoneId.systemDefault()).toInstant());
+    };
 
     @Override
     @Transactional
