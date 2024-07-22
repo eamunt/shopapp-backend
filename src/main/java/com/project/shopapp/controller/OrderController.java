@@ -89,15 +89,17 @@ public class OrderController {
     }
 
     // Delete
-    @DeleteMapping("/{orderId}")
+    @PutMapping ("delete/{orderId}/{active}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseObject> deleteOrder(
-            @Valid @PathVariable("orderId") Long orderId
+            @Valid @PathVariable("orderId") Long orderId,
+            @Valid @PathVariable int active
     ) throws Exception{
-        orderService.deleteOrder(orderId);
+        orderService.deleteOrder(orderId, active>0);
         // update status field => false.
+        String message  = active > 0 ? "Successfully blocked the order" : localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY, String.valueOf(orderId));
         return ResponseEntity.ok().body(ResponseObject.builder()
-                        .message(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY, String.valueOf(orderId)))
+                        .message(message)
                         .status(HttpStatus.OK)
                         .data(null)
                 .build());

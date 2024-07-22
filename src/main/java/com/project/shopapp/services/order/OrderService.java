@@ -127,12 +127,12 @@ public class OrderService implements IOrderService{
 
     @Override
     @Transactional
-    public void deleteOrder(Long orderId) throws Exception{
+    public void deleteOrder(Long orderId, boolean active) throws Exception{
         // soft-delete not hard-delete
         Order existingOrder = orderRepository.findOrderById(orderId)
                 .orElseThrow(() -> new DataNotFoundException("Order with id: " + orderId + " not found"));
         if(existingOrder != null){
-            existingOrder.setActive(false);
+            existingOrder.setActive(active);
             orderRepository.save(existingOrder);
         }
     }

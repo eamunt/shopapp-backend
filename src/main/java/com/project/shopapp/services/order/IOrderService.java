@@ -13,7 +13,7 @@ public interface IOrderService {
     OrderResponse createOrder(OrderDTO orderDTO) throws Exception;
     OrderResponse getOrder(Long orderId) throws Exception;
     OrderResponse updateOrder(Long orderId, OrderDTO order) throws Exception;
-    void deleteOrder(Long orderId) throws Exception;
+    void deleteOrder(Long orderId, boolean active) throws Exception;
     List<OrderResponse> findByUserId(User userId);
     Page<OrderResponse> getOrdersByKeyword(String keyword, Pageable pageable);
 }
