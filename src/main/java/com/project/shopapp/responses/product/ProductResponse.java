@@ -31,6 +31,7 @@ public class ProductResponse {
     private Category categoryId;
 
     @JsonProperty("product_images")
+    @Builder.Default
     private List<ProductImage> productImages = new ArrayList<>();
 
     @JsonProperty("created_at")

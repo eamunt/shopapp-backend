@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "coupon_conditions")
-@Data//toString
 @Getter
 @Setter
 @AllArgsConstructor

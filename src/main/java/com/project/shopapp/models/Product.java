@@ -43,6 +43,7 @@ public class Product extends BaseEntity{
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @JsonManagedReference
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
 }

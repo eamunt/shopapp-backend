@@ -75,6 +75,7 @@ public class Order extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "coupon_id", nullable = false)
     @JsonBackReference
+    @Builder.Default
     private Coupon coupon = null;
 
 }

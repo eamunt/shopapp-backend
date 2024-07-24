@@ -5,7 +5,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "coupons")
-@Data//toString
 @Getter
 @Setter
 @AllArgsConstructor

@@ -54,6 +54,16 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+jar {
+	manifest {
+		attributes(
+				'Main-Class': "com.project.shopapp.ShopappApplication"
+		)
+	}
+	from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE // Merge duplicate files
+	// duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Ignore duplicate files
+	// duplicatesStrategy = DuplicatesStrategy.FAIL // Fail on duplicate files
 }
